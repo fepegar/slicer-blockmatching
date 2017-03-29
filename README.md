@@ -1,6 +1,8 @@
 # Blockmatching
 3D Slicer module as a GUI for blockmatching.
 
+In `~/.slicerrc.py`:
+
 ```
 moduleFactory = slicer.app.moduleManager().factoryManager()
  
