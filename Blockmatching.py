@@ -245,39 +245,6 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.trsfTypeRadioButtons[0].setChecked(True)
 
 
-    def getCommandLineList(self):
-        cmd = [BLOCKMATCHING_PATH]
-
-        self.tempDir = slicer.util.tempDirectory()
-
-        self.refPath = str(self.logic.getNodeFilepath(self.referenceVolumeNode))
-        self.floPath = str(self.logic.getNodeFilepath(self.floatingVolumeNode))
-
-        if '.nii' in self.refPath:
-            self.resPath = str(self.logic.getTempPath(self.tempDir, '.nii.gz'))
-        elif '.hdr' in self.refPath:
-            self.resPath = str(self.logic.getTempPath(self.tempDir, '.hdr'))
-        self.resultTransformPath = str(self.logic.getTempPath(self.tempDir, '.trsf'))
-
-        trsfType = self.getSelectedTransformationType()
-
-        cmd += ['-ref', self.refPath]
-        cmd += ['-flo', self.floPath]
-        cmd += ['-res', self.resPath]
-        cmd += ['-res-trsf', self.resultTransformPath]
-        cmd += ['-py-hl', str(self.pyramidHighestSpinBox.value)]
-        cmd += ['-py-ll', str(self.pyramidLowestSpinBox.value)]
-        cmd += ['-trsf-type', trsfType]
-        cmd += ['-composition-with-initial']
-
-        if self.initialTransformNode:
-            self.initialTransformPath = str(self.logic.getTempPath(self.tempDir, '.trsf'))
-            self.logic.writeBaladinTransform(self.initialTransformNode, self.initialTransformPath)
-            cmd += ['-init-trsf', self.initialTransformPath]
-
-        self.commandLineList = cmd
-
-
     def printCommandLine(self):
         print ' '.join(self.commandLineList)
 
@@ -333,6 +300,52 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.resultTransformNode = self.resultTransformSelector.currentNode()
 
 
+    def getCommandLineList(self):
+        cmd = [BLOCKMATCHING_PATH]
+
+        self.tempDir = str(slicer.util.tempDirectory())
+
+        self.refPath = self.logic.getNodeFilepath(self.referenceVolumeNode)
+        self.floPath = self.logic.getNodeFilepath(self.floatingVolumeNode)
+
+        # We make sure they are in the disk
+        if not self.refPath:
+            self.refPath = self.logic.getTempPath(self.tempDir, '.nii')
+            slicer.util.saveNode(self.referenceVolumeNode, self.refPath)
+        if not self.floPath:
+            self.floPath = self.logic.getTempPath(self.tempDir, '.nii')
+            slicer.util.saveNode(self.floatingVolumeNode, self.floPath)
+
+        # Deprecated, kept for now
+        if '.nii' in self.refPath:
+            self.resPath = self.logic.getTempPath(self.tempDir, '.nii.gz')
+        elif '.hdr' in self.refPath:
+            self.resPath = self.logic.getTempPath(self.tempDir, '.hdr')
+        self.resultTransformPath = self.logic.getTempPath(self.tempDir, '.trsf')
+
+        # Save the command line for debugging
+        self.cmdPath = self.logic.getTempPath(self.tempDir, '.txt')
+
+        trsfType = self.getSelectedTransformationType()
+
+        cmd += ['-ref', self.refPath]
+        cmd += ['-flo', self.floPath]
+        cmd += ['-res', self.resPath]
+        cmd += ['-res-trsf', self.resultTransformPath]
+        cmd += ['-py-hl', str(self.pyramidHighestSpinBox.value)]
+        cmd += ['-py-ll', str(self.pyramidLowestSpinBox.value)]
+        cmd += ['-trsf-type', trsfType]
+        cmd += ['-composition-with-initial']
+        cmd += ['-command-line', self.cmdPath]
+
+        if self.initialTransformNode:
+            self.initialTransformPath = str(self.logic.getTempPath(self.tempDir, '.trsf'))
+            self.logic.writeBaladinTransform(self.initialTransformNode, self.initialTransformPath)
+            cmd += ['-init-trsf', self.initialTransformPath]
+
+        self.commandLineList = cmd
+
+
     def onApply(self):
         self.readParameters()
 
@@ -349,8 +362,8 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
             if p.returncode != 1:
                 print 'Return code:', p.returncode
                 print 'blockmatching error output: ' + output[1]
-
-                raise ValueError("blockmatching returned with error")
+                qt.QApplication.restoreOverrideCursor()
+                raise ValueError("blockmatching returned with error")  # this is bad python
             else:
                 tFin = time.time()
                 print 'Registration completed in %d seconds.' % (tFin - tIni)
@@ -358,7 +371,8 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         except OSError as e:
             print e
             print 'Is blockmatching installed?'
-        qt.QApplication.restoreOverrideCursor()
+        finally:
+            qt.QApplication.restoreOverrideCursor()
 
 
     def repareResults(self):
@@ -397,13 +411,26 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
             fgVolume = self.resultVolumeNode
 
         # If a transform was given, copy the result in it and apply it to the floating image
-        if self.resultTransformNode and self.getSelectedTransformationType() is not 'vectorfield':
-            matrix = self.logic.readBaladinTransform(self.resultTransformPath)
-            vtkMatrix = self.logic.getVTKMatrixFromNumpyMatrix(matrix)
-            # vtkMatrix.Invert()  # So that it goes from floating to reference
-            self.resultTransformNode.SetMatrixTransformFromParent(vtkMatrix)
-            self.floatingVolumeNode.SetAndObserveTransformNodeID(self.resultTransformNode.GetID())
-            fgVolume = self.floatingVolumeNode
+        trsfType = self.getSelectedTransformationType()
+        if self.resultTransformNode:
+            if trsfType is not 'vectorfield':
+                matrix = self.logic.readBaladinTransform(self.resultTransformPath)
+                vtkMatrix = self.logic.getVTKMatrixFromNumpyMatrix(matrix)
+                # vtkMatrix.Invert()  # So that it goes from floating to reference
+                self.resultTransformNode.SetMatrixTransformFromParent(vtkMatrix)
+                self.floatingVolumeNode.SetAndObserveTransformNodeID(self.resultTransformNode.GetID())
+                fgVolume = self.floatingVolumeNode
+            else:
+                # Remove result transform node
+                resultTransformName = self.resultTransformNode.GetName()
+                slicer.mrmlScene.RemoveNode(self.resultTransformNode)
+
+                # Load the new one
+                self.resultTransformNode = self.logic.vectorfieldToDisplacementField(
+                    self.resultTransformPath,
+                    self.referenceVolumeNode)
+                self.resultTransformNode.SetName(resultTransformName)
+                self.resultVolumeSelector.setCurrentNode(self.resultTransformNode)
 
 
         self.logic.setSlicesBackAndForeground(
@@ -437,7 +464,7 @@ class BlockmatchingLogic(ScriptedLoadableModuleLogic):
 
     def getTempPath(self, directory, ext):
         filename = ''.join(random.choice(string.ascii_lowercase) for _ in range(10)) + ext
-        # filename = 'temp' + ext
+        # filename = str(filename)
         return os.path.join(directory, filename)
 
 
@@ -538,17 +565,30 @@ class BlockmatchingLogic(ScriptedLoadableModuleLogic):
             f.write(line)
 
 
-def which(program):
-    def is_exe(fpath):
-        return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
-    fpath, fname = os.path.split(program)
-    if fpath:
-        if is_exe(program):
-            return program
-    else:
-        for path in os.environ["PATH"].split(os.pathsep):
-            path = path.strip('"')
-            exe_file = os.path.join(path, program)
-            if is_exe(exe_file):
-                return exe_file
-    return None
+    def vectorfieldToDisplacementField(self, vectorfieldPath, referenceNode):
+        stream = self.getDataStreamFromVectorField(vectorfieldPath)
+        referenceImage = su.PullFromSlicer(referenceNode.GetID())
+        shape = list(referenceImage.GetSize())
+        shape.reverse()
+        shape.append(3)
+        reshaped = stream.reshape(shape)
+        reshaped[..., :2] *= -1  # RAS to LPS
+        displacementImage = sitk.GetImageFromArray(reshaped)
+        displacementImage.SetOrigin(referenceImage.GetOrigin())
+        displacementImage.SetDirection(referenceImage.GetDirection())
+        displacementFieldPath = vectorfieldPath.replace('.trsf', '.nii')
+
+        # Temporary, it would be better to convert the image directly
+        # into a transform to save space and time
+        sitk.WriteImage(displacementImage, displacementFieldPath)
+        transformNode = slicer.util.loadTransform(displacementFieldPath, returnNode=True)[1]
+        return transformNode
+
+
+    def getDataStreamFromVectorField(self, vectorfieldPath):
+        HEADER_SIZE = 256
+        with open(vectorfieldPath, mode='rb') as f:  # b is important -> binary
+            f.seek(HEADER_SIZE)
+            imageData = f.read()
+        imageData = np.fromstring(imageData, dtype=np.float32)
+        return imageData
