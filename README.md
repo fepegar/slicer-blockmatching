@@ -21,15 +21,14 @@ import slicer
 
 moduleFactory = slicer.app.moduleManager().factoryManager()
  
-dirs = ['~/slicer',
-        '~/git/blockmatching']
+dirs = ['~/git/blockmatching']
 
-dirs = [os.path.expanduser(d) for d in dirs]
+dirs = filter(os.path.isdir, [os.path.expanduser(d) for d in dirs])
 
 for d in dirs:
     for fn in os.listdir(d):
-        if not fn.endswith('.py'): continue
-        if 'update' in fn: continue
+        if not fn.endswith('.py'):
+            continue
         fp = os.path.join(d, fn)
         moduleFactory.registerModule(qt.QFileInfo(fp))
         moduleFactory.loadModules([os.path.splitext(fn)[0]])

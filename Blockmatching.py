@@ -360,10 +360,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
             p = subprocess.Popen(self.commandLineList, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             output = p.communicate()
             if p.returncode != 1:
-                print 'Return code:', p.returncode
-                print 'blockmatching error output: ' + output[1]
-                qt.QApplication.restoreOverrideCursor()
-                raise ValueError("blockmatching returned with error")  # this is bad python
+                raise ValueError(output[1])  # is this bad python?
             else:
                 tFin = time.time()
                 print 'Registration completed in %d seconds.' % (tFin - tIni)
@@ -464,7 +461,6 @@ class BlockmatchingLogic(ScriptedLoadableModuleLogic):
 
     def getTempPath(self, directory, ext):
         filename = ''.join(random.choice(string.ascii_lowercase) for _ in range(10)) + ext
-        # filename = str(filename)
         return os.path.join(directory, filename)
 
 
