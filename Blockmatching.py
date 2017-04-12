@@ -349,8 +349,9 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
     def onApply(self):
         self.readParameters()
 
-        if not (self.validateImagesDirections() and self.validatePyramidLevels()):
-            return
+        ## not necessary in new versions of blockmatching
+        # if not (self.validateImagesDirections() and self.validatePyramidLevels()):
+        #     return
 
         self.getCommandLineList()
         self.printCommandLine()
@@ -423,12 +424,17 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
                 slicer.mrmlScene.RemoveNode(self.resultTransformNode)
 
                 # Load the new one
+                self.displacementFieldPath = self.resultTransformPath.replace('.trsf', '.nii')
                 self.resultTransformNode = self.logic.vectorfieldToDisplacementField(
                     self.resultTransformPath,
-                    self.referenceVolumeNode)
+                    self.referenceVolumeNode,
+                    self.displacementFieldPath)
                 self.resultTransformNode.SetName(resultTransformName)
-                self.resultVolumeSelector.setCurrentNode(self.resultTransformNode)
+                self.resultTransformSelector.setCurrentNode(self.resultTransformNode)
 
+                # For debugging
+                self.resultDisplacementFieldVolumeNode = slicer.util.loadVolume(self.displacementFieldPath, returnNode=True)[1]
+                self.resultDisplacementFieldVolumeNode.SetName(resultTransformName)
 
         self.logic.setSlicesBackAndForeground(
             bgVolume=self.referenceVolumeNode,
@@ -561,7 +567,7 @@ class BlockmatchingLogic(ScriptedLoadableModuleLogic):
             f.write(line)
 
 
-    def vectorfieldToDisplacementField(self, vectorfieldPath, referenceNode):
+    def vectorfieldToDisplacementField(self, vectorfieldPath, referenceNode, displacementFieldPath):
         stream = self.getDataStreamFromVectorField(vectorfieldPath)
         referenceImage = su.PullFromSlicer(referenceNode.GetID())
         shape = list(referenceImage.GetSize())
@@ -572,7 +578,6 @@ class BlockmatchingLogic(ScriptedLoadableModuleLogic):
         displacementImage = sitk.GetImageFromArray(reshaped)
         displacementImage.SetOrigin(referenceImage.GetOrigin())
         displacementImage.SetDirection(referenceImage.GetDirection())
-        displacementFieldPath = vectorfieldPath.replace('.trsf', '.nii')
 
         # Temporary, it would be better to convert the image directly
         # into a transform to save space and time
