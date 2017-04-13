@@ -1,5 +1,5 @@
 # Blockmatching
-3D Slicer module as a GUI for `blockmatching`.
+[3D Slicer](https://www.slicer.org/) module as a GUI for `blockmatching`.
 
 In a terminal, do:
 ```
