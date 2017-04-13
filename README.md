@@ -5,7 +5,7 @@ In a terminal, do:
 ```
 mkdir ~/git
 cd ~/git
-git clone https://github.com/fepegar/blockmatching.git
+git clone https://github.com/fepegar/slicer-blockmatching.git
 mkdir ~/bin
 ln -s $(which blockmatching) ~/bin
 ```
@@ -21,7 +21,7 @@ import slicer
 
 moduleFactory = slicer.app.moduleManager().factoryManager()
  
-dirs = ['~/git/blockmatching']
+dirs = ['~/git/slicer-blockmatching']
 
 dirs = filter(os.path.isdir, [os.path.expanduser(d) for d in dirs])
 
