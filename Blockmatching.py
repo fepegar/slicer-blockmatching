@@ -135,7 +135,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.referenceSelector.removeEnabled = True
         self.referenceSelector.noneEnabled = False
         self.referenceSelector.showHidden = False
-        self.referenceSelector.showChildNodeTypes = False
+        self.referenceSelector.showChildNodeTypes = True
         self.referenceSelector.setMRMLScene(slicer.mrmlScene)
         # self.referenceSelector.setToolTip( "Pick the input to the algorithm." )
         self.referenceSelector.currentNodeChanged.connect(self.onInputVolumeChanged)
@@ -150,7 +150,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.floatingSelector.removeEnabled = True
         self.floatingSelector.noneEnabled = False
         self.floatingSelector.showHidden = False
-        self.floatingSelector.showChildNodeTypes = False
+        self.floatingSelector.showChildNodeTypes = True
         self.floatingSelector.setMRMLScene(slicer.mrmlScene)
         # self.floatingSelector.setToolTip( "Pick the input to the algorithm." )
         self.floatingSelector.currentNodeChanged.connect(self.onInputVolumeChanged)
@@ -165,7 +165,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.initialTransformSelector.removeEnabled = True
         self.initialTransformSelector.noneEnabled = True
         self.initialTransformSelector.showHidden = False
-        self.initialTransformSelector.showChildNodeTypes = False
+        self.initialTransformSelector.showChildNodeTypes = True
         self.initialTransformSelector.setMRMLScene(slicer.mrmlScene)
         self.initialTransformSelector.baseName = 'Initial transform'
         # self.initialTransformSelector.setToolTip( "Pick the input to the algorithm." )
@@ -578,6 +578,7 @@ class BlockmatchingLogic(ScriptedLoadableModuleLogic):
         displacementImage = sitk.GetImageFromArray(reshaped)
         displacementImage.SetOrigin(referenceImage.GetOrigin())
         displacementImage.SetDirection(referenceImage.GetDirection())
+        displacementImage.SetSpacing(referenceImage.GetSpacing())
 
         # Temporary, it would be better to convert the image directly
         # into a transform to save space and time
