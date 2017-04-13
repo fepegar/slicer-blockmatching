@@ -149,7 +149,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.floatingSelector.addEnabled = False
         self.floatingSelector.removeEnabled = True
         self.floatingSelector.noneEnabled = False
-        self.floatingSelector.showHidden = False
+        self.floatingSelector.showHidden = True
         self.floatingSelector.showChildNodeTypes = True
         self.floatingSelector.setMRMLScene(slicer.mrmlScene)
         # self.floatingSelector.setToolTip( "Pick the input to the algorithm." )
@@ -164,7 +164,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.initialTransformSelector.addEnabled = False
         self.initialTransformSelector.removeEnabled = True
         self.initialTransformSelector.noneEnabled = True
-        self.initialTransformSelector.showHidden = False
+        self.initialTransformSelector.showHidden = True
         self.initialTransformSelector.showChildNodeTypes = True
         self.initialTransformSelector.setMRMLScene(slicer.mrmlScene)
         self.initialTransformSelector.baseName = 'Initial transform'
@@ -186,9 +186,10 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.resultTransformSelector.selectNodeUponCreation = True
         self.resultTransformSelector.addEnabled = True
         self.resultTransformSelector.removeEnabled = True
+        self.resultTransformSelector.renameEnabled = True
         self.resultTransformSelector.noneEnabled = True
         self.resultTransformSelector.showHidden = False
-        self.resultTransformSelector.showChildNodeTypes = False
+        self.resultTransformSelector.showChildNodeTypes = True
         self.resultTransformSelector.setMRMLScene(slicer.mrmlScene)
         # self.resultTransformSelector.baseName = 'Output transform'
         # self.resultTransformSelector.setToolTip( "Pick the input to the algorithm." )
@@ -205,7 +206,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.resultVolumeSelector.renameEnabled = True
         self.resultVolumeSelector.noneEnabled = True
         self.resultVolumeSelector.showHidden = False
-        self.resultVolumeSelector.showChildNodeTypes = False
+        self.resultVolumeSelector.showChildNodeTypes = True
         self.resultVolumeSelector.setMRMLScene(slicer.mrmlScene)
         self.resultVolumeSelector.baseName = RESULT_NAME
         # self.resultVolumeSelector.setToolTip( "Pick the input to the algorithm." )
@@ -348,11 +349,6 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
 
     def onApply(self):
         self.readParameters()
-
-        ## not necessary in new versions of blockmatching
-        # if not (self.validateImagesDirections() and self.validatePyramidLevels()):
-        #     return
-
         self.getCommandLineList()
         self.printCommandLine()
         tIni = time.time()
@@ -374,6 +370,10 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
 
 
     def repareResults(self):
+        """
+        Deprecated
+        """
+
         if '.nii' in self.refPath:
             resultImage = sitk.ReadImage(self.resPath)
             refDirection = self.logic.getDirection(self.referenceVolumeNode)
@@ -395,8 +395,6 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
 
 
     def loadResults(self):
-        # self.repareResults()  # not necessary in new versions of blockmatching
-
         if self.resultVolumeNode:
             # Remove result node
             resultName = self.resultVolumeNode.GetName()
@@ -410,14 +408,13 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
 
         # If a transform was given, copy the result in it and apply it to the floating image
         trsfType = self.getSelectedTransformationType()
-        if self.resultTransformNode:
+
+        if self.resultTransformNode is not None:
             if trsfType is not 'vectorfield':
                 matrix = self.logic.readBaladinTransform(self.resultTransformPath)
                 vtkMatrix = self.logic.getVTKMatrixFromNumpyMatrix(matrix)
-                # vtkMatrix.Invert()  # So that it goes from floating to reference
+
                 self.resultTransformNode.SetMatrixTransformFromParent(vtkMatrix)
-                self.floatingVolumeNode.SetAndObserveTransformNodeID(self.resultTransformNode.GetID())
-                fgVolume = self.floatingVolumeNode
             else:
                 # Remove result transform node
                 resultTransformName = self.resultTransformNode.GetName()
@@ -435,6 +432,9 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
                 # For debugging
                 self.resultDisplacementFieldVolumeNode = slicer.util.loadVolume(self.displacementFieldPath, returnNode=True)[1]
                 self.resultDisplacementFieldVolumeNode.SetName(resultTransformName)
+
+            self.floatingVolumeNode.SetAndObserveTransformNodeID(self.resultTransformNode.GetID())
+            fgVolume = self.floatingVolumeNode
 
         self.logic.setSlicesBackAndForeground(
             bgVolume=self.referenceVolumeNode,
