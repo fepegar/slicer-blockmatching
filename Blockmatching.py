@@ -317,11 +317,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
             self.floPath = self.logic.getTempPath(self.tempDir, '.nii')
             slicer.util.saveNode(self.floatingVolumeNode, self.floPath)
 
-        # Deprecated, kept for now
-        if '.nii' in self.refPath:
-            self.resPath = self.logic.getTempPath(self.tempDir, '.nii.gz')
-        elif '.hdr' in self.refPath:
-            self.resPath = self.logic.getTempPath(self.tempDir, '.hdr')
+        self.resPath = self.logic.getTempPath(self.tempDir, '.nii')
         self.resultTransformPath = self.logic.getTempPath(self.tempDir, '.trsf')
 
         # Save the command line for debugging
