@@ -357,6 +357,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
             else:
                 tFin = time.time()
                 print 'Registration completed in %d seconds.' % (tFin - tIni)
+                self.repareResults()
                 self.loadResults()
         except OSError as e:
             print e
@@ -367,26 +368,21 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
 
     def repareResults(self):
         """
-        Deprecated
+        This is used to correct 2D images that should be have size (si, sj, 1)
         """
 
         if '.nii' in self.refPath:
+            referenceImageData = self.referenceVolumeNode.GetImageData()
+            if referenceImageData.GetDimensions()[-1] != 1: return
+            print 'Correcting result image'
+            referenceImage = su.PullFromSlicer(referenceVolumeNode.GetID())
             resultImage = sitk.ReadImage(self.resPath)
-            refDirection = self.logic.getDirection(self.referenceVolumeNode)
-            refOrigin = list(self.referenceVolumeNode.GetOrigin())
-
-            # LPS (ITK) to RAS (Slicer)
-            for i in range(6):
-                refDirection[i] *= -1
-            for i in range(2):
-                refOrigin[i] *= -1
-
-            resultImage.SetDirection(refDirection)
-            resultImage.SetOrigin(refOrigin)
-
+            resultImage.SetOrigin(referenceImage.GetOrigin())
+            resultImage.SetSpacing(referenceImage.GetSpacing())
             sitk.WriteImage(resultImage, self.resPath)
 
-        elif '.hdr' in self.refPath:
+        elif self.refPath.endswith('.hdr'):
+            print 'Correcting result image'
             shutil.copy(self.refPath, self.resPath)
 
 
@@ -409,7 +405,6 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
             if trsfType is not 'vectorfield':
                 matrix = self.logic.readBaladinTransform(self.resultTransformPath)
                 vtkMatrix = self.logic.getVTKMatrixFromNumpyMatrix(matrix)
-
                 self.resultTransformNode.SetMatrixTransformFromParent(vtkMatrix)
             else:
                 # Remove result transform node
