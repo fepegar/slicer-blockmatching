@@ -164,7 +164,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.initialTransformSelector.addEnabled = False
         self.initialTransformSelector.removeEnabled = True
         self.initialTransformSelector.noneEnabled = True
-        self.initialTransformSelector.showHidden = True
+        self.initialTransformSelector.showHidden = False
         self.initialTransformSelector.showChildNodeTypes = True
         self.initialTransformSelector.setMRMLScene(slicer.mrmlScene)
         self.initialTransformSelector.baseName = 'Initial transform'
@@ -356,7 +356,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
                 raise ValueError(output[1])  # is this bad python?
             else:
                 tFin = time.time()
-                print 'Registration completed in %d seconds.' % (tFin - tIni)
+                print 'Registration completed in {} seconds\n\n'.format(tFin - tIni)
                 self.repareResults()
                 self.loadResults()
         except OSError as e:
@@ -422,7 +422,10 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
 
                 # For debugging
                 self.resultDisplacementFieldVolumeNode = slicer.util.loadVolume(self.displacementFieldPath, returnNode=True)[1]
-                self.resultDisplacementFieldVolumeNode.SetName(resultTransformName)
+                if self.resultDisplacementFieldVolumeNode:
+                    self.resultDisplacementFieldVolumeNode.SetName(resultTransformName)
+                else:
+                    print self.displacementFieldPath, 'not loaded!'
 
             self.floatingVolumeNode.SetAndObserveTransformNodeID(self.resultTransformNode.GetID())
             fgVolume = self.floatingVolumeNode
@@ -563,16 +566,27 @@ class BlockmatchingLogic(ScriptedLoadableModuleLogic):
         referenceImage = su.PullFromSlicer(referenceNode.GetID())
         shape = list(referenceImage.GetSize())
         shape.reverse()
-        shape.append(3)
+
+        # Blockmatching output might be 2D
+        is2D = shape[0] == 1
+        if is2D:  # 2D
+            shape.append(2)
+        else:  # 3D
+            shape.append(3)
         reshaped = stream.reshape(shape)
+
+        # Force the output to be 3D
+        if is2D:
+            zeros = np.zeros_like(reshaped[..., :1])
+            reshaped = np.concatenate((reshaped, zeros), axis=3)
+
         reshaped[..., :2] *= -1  # RAS to LPS
         displacementImage = sitk.GetImageFromArray(reshaped)
         displacementImage.SetOrigin(referenceImage.GetOrigin())
         displacementImage.SetDirection(referenceImage.GetDirection())
         displacementImage.SetSpacing(referenceImage.GetSpacing())
 
-        # Temporary, it would be better to convert the image directly
-        # into a transform to save space and time
+        # TODO: convert the image directly into a transform to save space and time
         sitk.WriteImage(displacementImage, displacementFieldPath)
         transformNode = slicer.util.loadTransform(displacementFieldPath, returnNode=True)[1]
         return transformNode
