@@ -352,7 +352,8 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
             qt.QApplication.setOverrideCursor(qt.Qt.WaitCursor)
             p = subprocess.Popen(self.commandLineList, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             output = p.communicate()
-            if p.returncode != 1:
+            if p.returncode != 0:
+                # Newer versions of blockmatching return 0
                 raise ValueError(output[1])  # is this bad python?
             else:
                 tFin = time.time()
