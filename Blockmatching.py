@@ -571,8 +571,11 @@ class BlockmatchingLogic(ScriptedLoadableModuleLogic):
         lines = []
         lines.append('(')
         lines.append('08')
-        for i in range(4):
-            lines.append(' '.join(map(str, matrix[i])))
+        for row in matrix:
+            line = []
+            for n in row:
+                line.append('{:13.8f}'.format(n))
+            lines.append(''.join(line))
         lines.append(')')
         line = '\n'.join(lines)
         with open(trsfPath, 'w') as f:
