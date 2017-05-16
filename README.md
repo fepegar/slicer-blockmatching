@@ -1,7 +1,7 @@
 # Blockmatching
 [3D Slicer](https://www.slicer.org/) module as a GUI for `blockmatching`.
 
-In a terminal, do:
+In a terminal, run:
 ```
 mkdir ~/git
 cd ~/git
