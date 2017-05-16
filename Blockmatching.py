@@ -352,9 +352,14 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
             qt.QApplication.setOverrideCursor(qt.Qt.WaitCursor)
             p = subprocess.Popen(self.commandLineList, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             output = p.communicate()
-            if p.returncode != 0:
+            if p.returncode != 0 or not self.outputsExist():
                 # Newer versions of blockmatching return 0
-                raise ValueError(output[1])  # is this bad python?
+                # Apparently it always returns 0 :(
+                qt.QApplication.restoreOverrideCursor()
+                errorMessage = output[1]
+                # slicer.util.delayDisplay(errorMessage, autoCloseMsec=0)
+                slicer.util.errorDisplay(errorMessage, windowTitle="Registration error")
+                raise ValueError(errorMessage)  # is this bad python?
             else:
                 tFin = time.time()
                 print 'Registration completed in {} seconds\n\n'.format(tFin - tIni)
@@ -388,7 +393,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
 
 
     def loadResults(self):
-        if self.resultVolumeNode:
+        if self.resultVolumeNode is not None:
             # Remove result node
             resultName = self.resultVolumeNode.GetName()
             slicer.mrmlScene.RemoveNode(self.resultVolumeNode)
@@ -439,6 +444,17 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
 
         self.logic.centerViews()
 
+
+    def outputsExist(self):
+        if self.resultVolumeNode is not None:
+            if not os.path.isfile(self.resPath):
+                return False
+
+        if self.resultTransformNode is not None:
+            if not os.path.isfile(self.resultTransformPath):
+                return False
+
+        return True
 
 
 class BlockmatchingLogic(ScriptedLoadableModuleLogic):
