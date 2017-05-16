@@ -346,6 +346,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
     def onApply(self):
         self.readParameters()
         self.getCommandLineList()
+        print '\n\n'
         self.printCommandLine()
         tIni = time.time()
         try:
@@ -359,10 +360,10 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
                 errorMessage = output[1]
                 # slicer.util.delayDisplay(errorMessage, autoCloseMsec=0)
                 slicer.util.errorDisplay(errorMessage, windowTitle="Registration error")
-                raise ValueError(errorMessage)  # is this bad python?
+                # raise ValueError(errorMessage)  # is this bad python?
             else:
                 tFin = time.time()
-                print 'Registration completed in {} seconds\n\n'.format(tFin - tIni)
+                print 'Registration completed in {} seconds'.format(tFin - tIni)
                 self.repareResults()
                 self.loadResults()
         except OSError as e:
@@ -377,18 +378,18 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         This is used to correct 2D images that should be have size (si, sj, 1)
         """
 
-        if '.nii' in self.refPath:
+        if '.nii' in self.resPath:
             referenceImageData = self.referenceVolumeNode.GetImageData()
             if referenceImageData.GetDimensions()[-1] != 1: return
-            print 'Correcting result image'
-            referenceImage = su.PullFromSlicer(referenceVolumeNode.GetID())
+            print 'Correcting result .nii image'
+            referenceImage = su.PullFromSlicer(self.referenceVolumeNode.GetID())
             resultImage = sitk.ReadImage(self.resPath)
             resultImage.SetOrigin(referenceImage.GetOrigin())
             resultImage.SetSpacing(referenceImage.GetSpacing())
             sitk.WriteImage(resultImage, self.resPath)
 
-        elif self.refPath.endswith('.hdr'):
-            print 'Correcting result image'
+        elif self.resPath.endswith('.hdr'):
+            print 'Correcting result .hdr  image'
             shutil.copy(self.refPath, self.resPath)
 
 
