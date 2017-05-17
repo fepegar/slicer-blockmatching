@@ -348,6 +348,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.getCommandLineList()
         print '\n\n'
         self.printCommandLine()
+        self.validateMatrices()
         tIni = time.time()
         try:
             qt.QApplication.setOverrideCursor(qt.Qt.WaitCursor)
@@ -447,6 +448,10 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
 
 
     def outputsExist(self):
+        """
+        We need this because it's not clear that blockmatching returns non-zero
+        when failed
+        """
         if self.resultVolumeNode is not None:
             if not os.path.isfile(self.resPath):
                 return False
@@ -456,6 +461,19 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
                 return False
 
         return True
+
+
+    def validateMatrices(self):
+        refQFormCode, refSFormCode = self.logic.getQFormAndSFormCodes(self.referenceVolumeNode)
+        floQFormCode, floSFormCode = self.logic.getQFormAndSFormCodes(self.floatingVolumeNode)
+        if refQFormCode != 0 and floQFormCode != 0: return
+        messages = ['Registration results might be unexpected:', '\n']
+        if refQFormCode == 0:
+            messages.append('Reference image does not have a valid qform_code')
+        if floQFormCode == 0:
+            messages.append('Floating image does not have a valid qform_code')
+        message = '\n'.join(messages)
+        slicer.util.warningDisplay(message)
 
 
 class BlockmatchingLogic(ScriptedLoadableModuleLogic):
@@ -620,3 +638,14 @@ class BlockmatchingLogic(ScriptedLoadableModuleLogic):
             imageData = f.read()
         imageData = np.fromstring(imageData, dtype=np.float32)
         return imageData
+
+
+    def getQFormAndSFormCodes(self, volumeNode):
+        reader = vtk.vtkNIFTIImageReader()
+        filepath = self.getNodeFilepath(volumeNode)
+        reader.SetFileName(filepath)
+        reader.Update()
+        header = reader.GetNIFTIHeader()
+        qform_code = header.GetQFormCode()
+        sform_code = header.GetSFormCode()
+        return qform_code, sform_code
