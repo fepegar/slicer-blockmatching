@@ -334,9 +334,9 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
     def onApply(self):
         self.readParameters()
         self.getCommandLineList()
+        self.showWarnings()
         print '\n\n'
         self.printCommandLine()
-        self.validateMatrices()
         tIni = time.time()
         try:
             qt.QApplication.setOverrideCursor(qt.Qt.WaitCursor)
@@ -466,6 +466,16 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
             messages.append('Floating image does not have a valid qform_code')
         message = '\n'.join(messages)
         slicer.util.warningDisplay(message)
+
+
+    def validateRefIsFloating(self):
+        if self.referenceVolumeNode is self.floatingVolumeNode:
+            slicer.util.warningDisplay('Reference and floating images are the same')
+
+
+    def showWarnings(self):
+        self.validateRefIsFloating()
+        self.validateMatrices()
 
 
 
