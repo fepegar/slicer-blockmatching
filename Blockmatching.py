@@ -395,6 +395,10 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
 
 
     def loadResults(self):
+        # Remove transform from reference
+        self.referenceVolumeNode.SetAndObserveTransformNodeID(None)
+
+        # Load the result node
         if self.resultVolumeNode is not None:
             # Remove result node
             resultName = self.resultVolumeNode.GetName()
@@ -410,16 +414,16 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         trsfType = self.getSelectedTransformationType()
 
         if self.resultTransformNode is not None:
-            if trsfType is not 'vectorfield':
+            if trsfType is not 'vectorfield':  # linear
                 matrix = self.logic.readBaladinTransform(self.resultTransformPath)
                 vtkMatrix = self.logic.getVTKMatrixFromNumpyMatrix(matrix)
                 self.resultTransformNode.SetMatrixTransformFromParent(vtkMatrix)
-            else:
-                # Remove result transform node
+            else:  # non-linear
+                # Remove result transform node from scene
                 resultTransformName = self.resultTransformNode.GetName()
                 slicer.mrmlScene.RemoveNode(self.resultTransformNode)
 
-                # Load the new one
+                # Load the generated one
                 self.displacementFieldPath = self.resultTransformPath.replace('.trsf', '.nii')
                 self.resultTransformNode = self.logic.vectorfieldToDisplacementField(
                     self.resultTransformPath,
@@ -474,6 +478,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
             messages.append('Floating image does not have a valid qform_code')
         message = '\n'.join(messages)
         slicer.util.warningDisplay(message)
+
 
 
 class BlockmatchingLogic(ScriptedLoadableModuleLogic):
