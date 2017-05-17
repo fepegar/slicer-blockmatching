@@ -271,18 +271,6 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         return trsfType
 
 
-    def validateImagesDirections(self):
-        same, m1, m2 = self.logic.haveSameDirections(self.referenceVolumeNode, self.floatingVolumeNode)
-        if same:
-            return True
-        else:
-            slicer.util.delayDisplay('Images do not have the same orientation')
-            print 'Images do not have the same orientation'
-            print 'Reference:', m1
-            print 'Floating:', m2
-            return False
-
-
     def validatePyramidLevels(self):
         if self.pyramidHighestSpinBox.value >= self.pyramidLowestSpinBox.value:
             return True
@@ -539,13 +527,6 @@ class BlockmatchingLogic(ScriptedLoadableModuleLogic):
             compositeNode.SetForegroundOpacity(.5)
             bgImageDisplayNode.SetAndObserveColorNodeID(GREEN)
             fgImageDisplayNode.SetAndObserveColorNodeID(MAGENTA)
-
-
-    def haveSameDirections(self, volumeNode1, volumeNode2):
-        m1, m2 = np.zeros((2,3,3))
-        volumeNode1.GetIJKToRASDirections(m1)
-        volumeNode2.GetIJKToRASDirections(m2)
-        return np.array_equal(m1, m2), m1, m2
 
 
     def getNumpyMatrixFromVTKMatrix(self, vtkMatrix):
