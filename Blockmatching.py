@@ -300,13 +300,13 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         cmd += ['-py-hl', str(self.pyramidHighestSpinBox.value)]
         cmd += ['-py-ll', str(self.pyramidLowestSpinBox.value)]
         cmd += ['-trsf-type', trsfType]
-        cmd += ['-composition-with-initial']
         cmd += ['-command-line', self.cmdPath]
 
         if self.initialTransformNode:
             self.initialTransformPath = str(self.logic.getTempPath(self.tempDir, '.trsf'))
             self.logic.writeBaladinMatrix(self.initialTransformNode, self.initialTransformPath)
             cmd += ['-init-trsf', self.initialTransformPath]
+            cmd += ['-composition-with-initial']
 
         self.commandLineList = cmd
 
