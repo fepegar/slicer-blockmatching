@@ -305,7 +305,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
 
         if self.initialTransformNode:
             self.initialTransformPath = str(self.logic.getTempPath(self.tempDir, '.trsf'))
-            self.logic.writeBaladinTransform(self.initialTransformNode, self.initialTransformPath)
+            self.logic.writeBaladinMatrix(self.initialTransformNode, self.initialTransformPath)
             cmd += ['-init-trsf', self.initialTransformPath]
 
         self.commandLineList = cmd
@@ -352,7 +352,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
 
         if self.resultTransformNode is not None:
             if trsfType is not 'vectorfield':  # linear
-                matrix = self.logic.readBaladinTransform(self.resultTransformPath)
+                matrix = self.logic.readBaladinMatrix(self.resultTransformPath)
                 vtkMatrix = self.logic.getVTKMatrixFromNumpyMatrix(matrix)
                 self.resultTransformNode.SetMatrixTransformFromParent(vtkMatrix)
             else:  # non-linear
@@ -473,7 +473,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
                 self.loadResults()
         except OSError as e:
             print e
-            print 'Is blockmatching installed?'
+            print 'Is blockmatching correctly installed?'
         finally:
             qt.QApplication.restoreOverrideCursor()
 
@@ -550,23 +550,15 @@ class BlockmatchingLogic(ScriptedLoadableModuleLogic):
         return vtkMatrix
 
 
-    def readBaladinTransform(self, trsfPath):
-        with open(trsfPath, 'r') as f:
-            firstLine = f.readline()
-
-        vectorfield = 'INRIMAGE' in firstLine
-
-        if vectorfield:
-            pass  # TODO
-        else:
-            with open(trsfPath) as f:
-                lines = f.readlines()
-                numbersLines = lines[2:6]
-                matrix = np.loadtxt(numbersLines)
-                return matrix
+    def readBaladinMatrix(self, trsfPath):
+        with open(trsfPath) as f:
+            lines = f.readlines()
+            numbersLines = lines[2:6]
+            matrix = np.loadtxt(numbersLines)
+            return matrix
 
 
-    def writeBaladinTransform(self, transformNode, trsfPath):
+    def writeBaladinMatrix(self, transformNode, trsfPath):
         vtkMatrix = vtk.vtkMatrix4x4()
         transformNode.GetMatrixTransformFromParent(vtkMatrix)
         matrix = self.getNumpyMatrixFromVTKMatrix(vtkMatrix)
