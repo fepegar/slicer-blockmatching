@@ -486,18 +486,6 @@ class BlockmatchingLogic(ScriptedLoadableModuleLogic):
         return storageNode.GetFileName()
 
 
-    def getDirections(self, node):
-        d = [3*[0] for x in xrange(3)]
-        node.GetIJKToRASDirections(d)
-        return np.array(d)  # 3x3
-
-
-    def getDirection(self, node):
-        ds = self.getDirections(node)
-        d = [n for sublist in ds for n in sublist]  # http://stackoverflow.com/questions/952914/making-a-flat-list-out-of-list-of-lists-in-python
-        return d
-
-
     def getTempPath(self, directory, ext):
         filename = ''.join(random.choice(string.ascii_lowercase) for _ in range(10)) + ext
         return os.path.join(directory, filename)
