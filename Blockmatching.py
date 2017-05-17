@@ -224,11 +224,14 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
 
         self.pyramidHighestSpinBox = qt.QSpinBox()
         self.parametersLayout.addRow('Highest pyramid level:', self.pyramidHighestSpinBox)
-        self.pyramidHighestSpinBox.value = 3
+        self.pyramidHighestSpinBox.value = 4
+        self.pyramidHighestSpinBox.valueChanged.connect(self.onPyramidLevelsChanged)
+
 
         self.pyramidLowestSpinBox = qt.QSpinBox()
         self.parametersLayout.addRow('Lowest pyramid level:', self.pyramidLowestSpinBox)
-        self.pyramidLowestSpinBox.value = 2 #0
+        self.pyramidLowestSpinBox.value = 2
+        self.pyramidLowestSpinBox.valueChanged.connect(self.onPyramidLevelsChanged)
 
 
     def makeTransformationTypeWidgets(self):
@@ -250,34 +253,11 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         print ' '.join(self.commandLineList)
 
 
-    def onInputVolumeChanged(self):
-        self.readParameters()
-
-        validMinimumInputs = self.referenceVolumeNode and self.floatingVolumeNode and (self.resultVolumeNode or self.resultTransformNode)
-
-        self.applyButton.setEnabled(validMinimumInputs)
-
-
-    def onTransformationTypeChanged(self):
-        trsf = self.getSelectedTransformationType()
-        self.resultTransformSelector.baseName = 'Output %s transform' % trsf
-        self.resultVolumeSelector.baseName = 'Output %s volume' % trsf
-
-
     def getSelectedTransformationType(self):
         for b in self.trsfTypeRadioButtons:
             if b.isChecked():
                 trsfType = TRANSFORMATIONS_MAP[str(b.text)]
         return trsfType
-
-
-    def validatePyramidLevels(self):
-        if self.pyramidHighestSpinBox.value >= self.pyramidLowestSpinBox.value:
-            return True
-        else:
-            slicer.util.delayDisplay('Invalid pyramid values')
-            print 'Invalid pyramid values'
-            return False
 
 
     def readParameters(self):
@@ -329,37 +309,6 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
             cmd += ['-init-trsf', self.initialTransformPath]
 
         self.commandLineList = cmd
-
-
-    def onApply(self):
-        self.readParameters()
-        self.getCommandLineList()
-        self.showWarnings()
-        print '\n\n'
-        self.printCommandLine()
-        tIni = time.time()
-        try:
-            qt.QApplication.setOverrideCursor(qt.Qt.WaitCursor)
-            p = subprocess.Popen(self.commandLineList, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            output = p.communicate()
-            if p.returncode != 0 or not self.outputsExist():
-                # Newer versions of blockmatching return 0
-                # Apparently it always returns 0 :(
-                qt.QApplication.restoreOverrideCursor()
-                errorMessage = output[1]
-                # slicer.util.delayDisplay(errorMessage, autoCloseMsec=0)
-                slicer.util.errorDisplay(errorMessage, windowTitle="Registration error")
-                # raise ValueError(errorMessage)  # is this bad python?
-            else:
-                tFin = time.time()
-                print 'Registration completed in {} seconds'.format(tFin - tIni)
-                self.repareResults()
-                self.loadResults()
-        except OSError as e:
-            print e
-            print 'Is blockmatching installed?'
-        finally:
-            qt.QApplication.restoreOverrideCursor()
 
 
     def repareResults(self):
@@ -476,6 +425,57 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
     def showWarnings(self):
         self.validateRefIsFloating()
         self.validateMatrices()
+
+
+    ### Signals ###
+    def onInputVolumeChanged(self):
+        self.readParameters()
+
+        validMinimumInputs = self.referenceVolumeNode and self.floatingVolumeNode and (self.resultVolumeNode or self.resultTransformNode)
+
+        self.applyButton.setEnabled(validMinimumInputs)
+
+
+    def onTransformationTypeChanged(self):
+        trsf = self.getSelectedTransformationType()
+        self.resultTransformSelector.baseName = 'Output %s transform' % trsf
+        self.resultVolumeSelector.baseName = 'Output %s volume' % trsf
+
+
+    def onPyramidLevelsChanged(self):
+        self.pyramidLowestSpinBox.maximum = self.pyramidHighestSpinBox.value
+        self.pyramidHighestSpinBox.minimum = self.pyramidLowestSpinBox.value
+
+
+    def onApply(self):
+        self.readParameters()
+        self.getCommandLineList()
+        self.showWarnings()
+        print '\n\n'
+        self.printCommandLine()
+        tIni = time.time()
+        try:
+            qt.QApplication.setOverrideCursor(qt.Qt.WaitCursor)
+            p = subprocess.Popen(self.commandLineList, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            output = p.communicate()
+            if p.returncode != 0 or not self.outputsExist():
+                # Newer versions of blockmatching return 0
+                # Apparently it always returns 0 :(
+                qt.QApplication.restoreOverrideCursor()
+                errorMessage = output[1]
+                # slicer.util.delayDisplay(errorMessage, autoCloseMsec=0)
+                slicer.util.errorDisplay(errorMessage, windowTitle="Registration error")
+                # raise ValueError(errorMessage)  # is this bad python?
+            else:
+                tFin = time.time()
+                print 'Registration completed in {} seconds'.format(tFin - tIni)
+                self.repareResults()
+                self.loadResults()
+        except OSError as e:
+            print e
+            print 'Is blockmatching installed?'
+        finally:
+            qt.QApplication.restoreOverrideCursor()
 
 
 
