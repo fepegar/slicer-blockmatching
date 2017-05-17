@@ -137,7 +137,6 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.referenceSelector.showHidden = False
         self.referenceSelector.showChildNodeTypes = True
         self.referenceSelector.setMRMLScene(slicer.mrmlScene)
-        # self.referenceSelector.setToolTip( "Pick the input to the algorithm." )
         self.referenceSelector.currentNodeChanged.connect(self.onInputVolumeChanged)
         self.inputsLayout.addRow("Reference: ", self.referenceSelector)
 
@@ -152,7 +151,6 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.floatingSelector.showHidden = True
         self.floatingSelector.showChildNodeTypes = True
         self.floatingSelector.setMRMLScene(slicer.mrmlScene)
-        # self.floatingSelector.setToolTip( "Pick the input to the algorithm." )
         self.floatingSelector.currentNodeChanged.connect(self.onInputVolumeChanged)
         self.inputsLayout.addRow("Floating: ", self.floatingSelector)
 
@@ -168,7 +166,6 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.initialTransformSelector.showChildNodeTypes = True
         self.initialTransformSelector.setMRMLScene(slicer.mrmlScene)
         self.initialTransformSelector.baseName = 'Initial transform'
-        # self.initialTransformSelector.setToolTip( "Pick the input to the algorithm." )
         self.initialTransformSelector.currentNodeChanged.connect(self.onInputVolumeChanged)
         self.inputsLayout.addRow("Initial transform: ", self.initialTransformSelector)
 
@@ -191,8 +188,6 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.resultTransformSelector.showHidden = False
         self.resultTransformSelector.showChildNodeTypes = True
         self.resultTransformSelector.setMRMLScene(slicer.mrmlScene)
-        # self.resultTransformSelector.baseName = 'Output transform'
-        # self.resultTransformSelector.setToolTip( "Pick the input to the algorithm." )
         self.resultTransformSelector.currentNodeChanged.connect(self.onInputVolumeChanged)
         self.outputsLayout.addRow("Result transform: ", self.resultTransformSelector)
 
@@ -208,8 +203,6 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.resultVolumeSelector.showHidden = False
         self.resultVolumeSelector.showChildNodeTypes = True
         self.resultVolumeSelector.setMRMLScene(slicer.mrmlScene)
-        self.resultVolumeSelector.baseName = RESULT_NAME
-        # self.resultVolumeSelector.setToolTip( "Pick the input to the algorithm." )
         self.resultVolumeSelector.currentNodeChanged.connect(self.onInputVolumeChanged)
         self.outputsLayout.addRow("Result volume: ", self.resultVolumeSelector)
 
