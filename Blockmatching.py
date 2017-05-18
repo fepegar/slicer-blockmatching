@@ -19,12 +19,7 @@ import sys
 BLOCKMATCHING_PATH = os.path.expanduser('~/bin/blockmatching')
 RESULT_NAME = 'Blockmatching result'
 ALIGN_CENTER = 4
-TRANSFORMATIONS_MAP = collections.OrderedDict([
-                                               ('Rigid', 'rigid'),
-                                               ('Similitude', 'similitude'),
-                                               ('Affine', 'affine'),
-                                               ('Vectorfield', 'vectorfield')
-                                              ])
+TRANSFORMATIONS = ['Rigid', 'Similitude', 'Affine', 'Vectorfield']
 
 
 class Blockmatching(ScriptedLoadableModule):
@@ -244,8 +239,8 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         trsfTypeLayout = qt.QHBoxLayout(self.trsfTypeGroupBox)
 
         self.trsfTypeRadioButtons = []
-        for t in TRANSFORMATIONS_MAP:
-            radioButton = qt.QRadioButton(t)
+        for trsfType in TRANSFORMATIONS:
+            radioButton = qt.QRadioButton(trsfType)
             radioButton.clicked.connect(self.onTransformationTypeChanged)
             self.trsfTypeRadioButtons.append(radioButton)
             trsfTypeLayout.addWidget(radioButton)
@@ -260,7 +255,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
     def getSelectedTransformationType(self):
         for b in self.trsfTypeRadioButtons:
             if b.isChecked():
-                trsfType = TRANSFORMATIONS_MAP[str(b.text)]
+                trsfType = str(b.text).lower()
         return trsfType
 
 
@@ -462,7 +457,6 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
 
         self.pyramidHighestLabel.text = self.referencePyramidMap[self.pyramidHighestSpinBox.value]
         self.pyramidLowestLabel.text = self.referencePyramidMap[self.pyramidLowestSpinBox.value]
-
 
 
     def onApply(self):
