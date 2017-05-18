@@ -455,8 +455,12 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.pyramidLowestSpinBox.maximum = self.pyramidHighestSpinBox.value
         self.pyramidHighestSpinBox.minimum = self.pyramidLowestSpinBox.value
 
-        self.pyramidHighestLabel.text = self.referencePyramidMap[self.pyramidHighestSpinBox.value]
-        self.pyramidLowestLabel.text = self.referencePyramidMap[self.pyramidLowestSpinBox.value]
+        if self.referencePyramidMap is None:
+            self.pyramidHighestLabel.text = ''
+            self.pyramidLowestLabel.text = ''
+        else:
+            self.pyramidHighestLabel.text = self.referencePyramidMap[self.pyramidHighestSpinBox.value]
+            self.pyramidLowestLabel.text = self.referencePyramidMap[self.pyramidLowestSpinBox.value]
 
 
     def onApply(self):
