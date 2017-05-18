@@ -423,10 +423,19 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
     ### Signals ###
     def onInputVolumeChanged(self):
         self.readParameters()
-
-        validMinimumInputs = self.referenceVolumeNode and self.floatingVolumeNode and (self.resultVolumeNode or self.resultTransformNode)
-
+        validMinimumInputs = self.referenceVolumeNode and \
+                             self.floatingVolumeNode and \
+                             (self.resultVolumeNode or self.resultTransformNode)
         self.applyButton.setEnabled(validMinimumInputs)
+
+        self.referencePyramidMap = self.logic.getPyramidShapesMap(self.referenceVolumeNode)
+        if self.referencePyramidMap is None:
+            self.pyramidHighestSpinBox.setDisabled(True)
+            self.pyramidLowestSpinBox.setDisabled(True)
+        else:
+            self.pyramidHighestSpinBox.setEnabled(True)
+            self.pyramidLowestSpinBox.setEnabled(True)
+            self.pyramidHighestSpinBox.maximum = max(self.referencePyramidMap.keys())
 
 
     def onTransformationTypeChanged(self):
@@ -618,3 +627,40 @@ class BlockmatchingLogic(ScriptedLoadableModuleLogic):
         qform_code = header.GetQFormCode()
         sform_code = header.GetSFormCode()
         return qform_code, sform_code
+
+
+    def getPyramidShapesMap(self, volumeNode):
+
+        def closestPowerofTwo(n):
+            """
+            f(513) = 512
+            f(512) = 256
+            """
+            p = np.log(n) / np.log(2)
+            if p % 1 == 0:
+                result = 2 ** (p-1)
+            else:
+                result = 2 ** np.floor(p)
+            return int(result)
+
+        if volumeNode is None: return None
+
+        imageData = volumeNode.GetImageData()
+        shape = list(imageData.GetDimensions())
+
+        level = 0
+        shapesMap = {level: shape}
+
+        lastLevel = False
+        while not lastLevel:
+            oldShape = shapesMap[level]
+            maxDim = max(oldShape)
+            closestPower = closestPowerofTwo(maxDim)
+            newShape = [min(closestPower, n) for n in oldShape]
+            level += 1
+            shapesMap[level] = newShape
+
+            if max(newShape) == 32:
+                lastLevel = True
+
+        return shapesMap
