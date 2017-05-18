@@ -215,16 +215,25 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
 
         self.makeTransformationTypeWidgets()
 
+        self.pyramidGroupBox = qt.QGroupBox()
+        self.pyramidLayout = qt.QGridLayout(self.pyramidGroupBox)
+        self.parametersLayout.addRow('Pyramid levels:', self.pyramidGroupBox)
+
         self.pyramidHighestSpinBox = qt.QSpinBox()
-        self.parametersLayout.addRow('Highest pyramid level:', self.pyramidHighestSpinBox)
         self.pyramidHighestSpinBox.value = 4
         self.pyramidHighestSpinBox.valueChanged.connect(self.onPyramidLevelsChanged)
-
+        self.pyramidHighestLabel = qt.QLabel()
+        self.pyramidLayout.addWidget(qt.QLabel('Highest:'), 0, 0)
+        self.pyramidLayout.addWidget(self.pyramidHighestSpinBox, 0, 1)
+        self.pyramidLayout.addWidget(self.pyramidHighestLabel, 0, 2)
 
         self.pyramidLowestSpinBox = qt.QSpinBox()
-        self.parametersLayout.addRow('Lowest pyramid level:', self.pyramidLowestSpinBox)
         self.pyramidLowestSpinBox.value = 2
         self.pyramidLowestSpinBox.valueChanged.connect(self.onPyramidLevelsChanged)
+        self.pyramidLowestLabel = qt.QLabel()
+        self.pyramidLayout.addWidget(qt.QLabel('Lowest:'), 1, 0)
+        self.pyramidLayout.addWidget(self.pyramidLowestSpinBox, 1, 1)
+        self.pyramidLayout.addWidget(self.pyramidLowestLabel, 1, 2)
 
 
     def makeTransformationTypeWidgets(self):
