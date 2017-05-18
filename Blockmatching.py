@@ -350,7 +350,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         trsfType = self.getSelectedTransformationType()
 
         if self.resultTransformNode is not None:
-            if trsfType is not 'vectorfield':  # linear
+            if trsfType != 'vectorfield':  # linear
                 matrix = self.logic.readBaladinMatrix(self.resultTransformPath)
                 vtkMatrix = self.logic.getVTKMatrixFromNumpyMatrix(matrix)
                 self.resultTransformNode.SetMatrixTransformFromParent(vtkMatrix)
