@@ -18,7 +18,7 @@ import sys
 # BLOCKMATCHING_PATH = '/home/fernando/git/morpheme-privat/vt/build/bin/blockmatching'
 BLOCKMATCHING_PATH = os.path.expanduser('~/bin/blockmatching')
 RESULT_NAME = 'Blockmatching result'
-
+ALIGN_CENTER = 4
 TRANSFORMATIONS_MAP = collections.OrderedDict([
                                                ('Rigid', 'rigid'),
                                                ('Similitude', 'similitude'),
@@ -220,9 +220,10 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.parametersLayout.addRow('Pyramid levels:', self.pyramidGroupBox)
 
         self.pyramidHighestSpinBox = qt.QSpinBox()
-        self.pyramidHighestSpinBox.value = 4
+        self.pyramidHighestSpinBox.value = 3
         self.pyramidHighestSpinBox.valueChanged.connect(self.onPyramidLevelsChanged)
         self.pyramidHighestLabel = qt.QLabel()
+        self.pyramidHighestLabel.setAlignment(ALIGN_CENTER)
         self.pyramidLayout.addWidget(qt.QLabel('Highest:'), 0, 0)
         self.pyramidLayout.addWidget(self.pyramidHighestSpinBox, 0, 1)
         self.pyramidLayout.addWidget(self.pyramidHighestLabel, 0, 2)
@@ -231,6 +232,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.pyramidLowestSpinBox.value = 2
         self.pyramidLowestSpinBox.valueChanged.connect(self.onPyramidLevelsChanged)
         self.pyramidLowestLabel = qt.QLabel()
+        self.pyramidLowestLabel.setAlignment(ALIGN_CENTER)
         self.pyramidLayout.addWidget(qt.QLabel('Lowest:'), 1, 0)
         self.pyramidLayout.addWidget(self.pyramidLowestSpinBox, 1, 1)
         self.pyramidLayout.addWidget(self.pyramidLowestLabel, 1, 2)
@@ -445,6 +447,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
             self.pyramidHighestSpinBox.setEnabled(True)
             self.pyramidLowestSpinBox.setEnabled(True)
             self.pyramidHighestSpinBox.maximum = max(self.referencePyramidMap.keys())
+        self.onPyramidLevelsChanged()
 
 
     def onTransformationTypeChanged(self):
@@ -456,6 +459,10 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
     def onPyramidLevelsChanged(self):
         self.pyramidLowestSpinBox.maximum = self.pyramidHighestSpinBox.value
         self.pyramidHighestSpinBox.minimum = self.pyramidLowestSpinBox.value
+
+        self.pyramidHighestLabel.text = self.referencePyramidMap[self.pyramidHighestSpinBox.value]
+        self.pyramidLowestLabel.text = self.referencePyramidMap[self.pyramidLowestSpinBox.value]
+
 
 
     def onApply(self):
