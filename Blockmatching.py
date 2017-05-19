@@ -376,7 +376,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
                 resultTransformName = self.resultTransformNode.GetName()
                 slicer.mrmlScene.RemoveNode(self.resultTransformNode)
 
-                # Load the generated one
+                # Load the generated transform node
                 self.displacementFieldPath = self.resultTransformPath.replace('.trsf', '.nii')
                 self.resultTransformNode = self.logic.vectorfieldToDisplacementField(
                     self.resultTransformPath,
@@ -384,13 +384,6 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
                     self.displacementFieldPath)
                 self.resultTransformNode.SetName(resultTransformName)
                 self.resultTransformSelector.setCurrentNode(self.resultTransformNode)
-
-                # For debugging
-                self.resultDisplacementFieldVolumeNode = slicer.util.loadVolume(self.displacementFieldPath, returnNode=True)[1]
-                if self.resultDisplacementFieldVolumeNode:
-                    self.resultDisplacementFieldVolumeNode.SetName(resultTransformName)
-                else:
-                    print self.displacementFieldPath, 'not loaded!'
 
             self.floatingVolumeNode.SetAndObserveTransformNodeID(self.resultTransformNode.GetID())
             fgVolume = self.floatingVolumeNode
