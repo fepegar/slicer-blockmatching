@@ -252,10 +252,6 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.trsfTypeRadioButtons[0].setChecked(True)
 
 
-    def printCommandLine(self):
-        print ' '.join(self.commandLineList)
-
-
     def getSelectedTransformationType(self):
         for b in self.trsfTypeRadioButtons:
             if b.isChecked():
@@ -315,6 +311,15 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
             cmd += ['-composition-with-initial']
 
         self.commandLineList = cmd
+
+
+    def printCommandLine(self):
+        prettyCmd = []
+        for s in self.commandLineList:
+            if s.startswith('-'):
+                prettyCmd.append('\\\n')
+            prettyCmd.append(s)
+        print ' '.join(prettyCmd)
 
 
     def repareResults(self):
