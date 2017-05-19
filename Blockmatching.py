@@ -291,7 +291,8 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.resultTransformPath = self.logic.getTempPath(self.tempDir, '.trsf', filename='ref-{}_flo-{}'.format(refName, floName))
 
         # Save the command line for debugging
-        self.cmdPath = self.logic.getTempPath(self.tempDir, '.txt', filename='ref-{}_flo-{}'.format(refName, floName))
+        self.cmdPath = self.logic.getTempPath(self.tempDir, '.txt', filename='cmd_ref-{}_flo-{}'.format(refName, floName))
+        self.logPath = self.logic.getTempPath(self.tempDir, '.txt', filename='log_ref-{}_flo-{}'.format(refName, floName))
 
         trsfType = self.getSelectedTransformationType()
 
@@ -303,6 +304,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         cmd += ['-pyramid-lowest-level', str(self.pyramidLowestSpinBox.value)]
         cmd += ['-transformation-type', trsfType]
         cmd += ['-command-line', self.cmdPath]
+        cmd += ['-logfile', self.logPath]
 
         if self.pyramidGaussianFilteringCheckBox.isChecked():
             cmd += ['-pyramid-gaussian-filtering']
