@@ -29,7 +29,7 @@ class Blockmatching(ScriptedLoadableModule):
         self.parent.title = "Blockmatching"
         self.parent.categories = ["Registration"]
         self.parent.dependencies = []
-        self.parent.contributors = ["Fernando Perez-Garcia (fepegar@gmail.com - Institute of the Brain and Spine - Paris)"]
+        self.parent.contributors = ["Fernando Perez-Garcia (fepegar@gmail.com - Brain & Spine Institute - Paris)"]
         self.parent.helpText = """
         """
         self.parent.acknowledgementText = """
