@@ -232,6 +232,10 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.pyramidLayout.addWidget(self.pyramidLowestSpinBox, 1, 1)
         self.pyramidLayout.addWidget(self.pyramidLowestLabel, 1, 2)
 
+        self.pyramidGaussianFilteringCheckBox = qt.QCheckBox()
+        self.pyramidLayout.addWidget(qt.QLabel('Gaussian filtering:'), 2, 0)
+        self.pyramidLayout.addWidget(self.pyramidGaussianFilteringCheckBox, 2, 1)
+
 
     def makeTransformationTypeWidgets(self):
         self.trsfTypeGroupBox = qt.QGroupBox()
@@ -300,6 +304,9 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         cmd += ['-py-ll', str(self.pyramidLowestSpinBox.value)]
         cmd += ['-trsf-type', trsfType]
         cmd += ['-command-line', self.cmdPath]
+
+        if self.pyramidGaussianFilteringCheckBox.isChecked():
+            cmd += ['-py-gf']
 
         if self.initialTransformNode:
             self.initialTransformPath = str(self.logic.getTempPath(self.tempDir, '.trsf'))
