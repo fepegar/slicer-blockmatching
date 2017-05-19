@@ -496,7 +496,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
                 # raise ValueError(errorMessage)  # is this bad python?
             else:
                 tFin = time.time()
-                print 'Registration completed in {} seconds'.format(tFin - tIni)
+                print '\nRegistration completed in {:.2f} seconds'.format(tFin - tIni)
                 self.repareResults()
                 self.loadResults()
         except OSError as e:
