@@ -276,19 +276,22 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.refPath = self.logic.getNodeFilepath(self.referenceVolumeNode)
         self.floPath = self.logic.getNodeFilepath(self.floatingVolumeNode)
 
+        refName = self.referenceVolumeNode.GetName()
+        floName = self.floatingVolumeNode.GetName()
+
         # We make sure they are in the disk
         if not self.refPath:
             self.refPath = self.logic.getTempPath(self.tempDir, '.nii')
-            slicer.util.saveNode(self.referenceVolumeNode, self.refPath)
+            slicer.util.saveNode(self.referenceVolumeNode, self.refPath, filename=refName)
         if not self.floPath:
             self.floPath = self.logic.getTempPath(self.tempDir, '.nii')
-            slicer.util.saveNode(self.floatingVolumeNode, self.floPath)
+            slicer.util.saveNode(self.floatingVolumeNode, self.floPath, filename=floName)
 
-        self.resPath = self.logic.getTempPath(self.tempDir, '.nii')
-        self.resultTransformPath = self.logic.getTempPath(self.tempDir, '.trsf')
+        self.resPath = self.logic.getTempPath(self.tempDir, '.nii', filename='{}_on_{}'.format(floName, refName))
+        self.resultTransformPath = self.logic.getTempPath(self.tempDir, '.trsf', filename='ref-{}_flo-{}'.format(refName, floName))
 
         # Save the command line for debugging
-        self.cmdPath = self.logic.getTempPath(self.tempDir, '.txt')
+        self.cmdPath = self.logic.getTempPath(self.tempDir, '.txt', filename='ref-{}_flo-{}'.format(refName, floName))
 
         trsfType = self.getSelectedTransformationType()
 
@@ -514,8 +517,9 @@ class BlockmatchingLogic(ScriptedLoadableModuleLogic):
         return storageNode.GetFileName()
 
 
-    def getTempPath(self, directory, ext):
-        filename = ''.join(random.choice(string.ascii_lowercase) for _ in range(10)) + ext
+    def getTempPath(self, directory, ext, filename=None):
+        if filename is None:
+            filename = ''.join(random.choice(string.ascii_lowercase) for _ in range(10)) + ext
         return os.path.join(directory, filename)
 
 
