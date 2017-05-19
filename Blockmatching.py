@@ -329,7 +329,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
 
     def repareResults(self):
         """
-        This is used to correct 2D images that should be have size (si, sj, 1)
+        This is used to correct 2D images that should have size (si, sj, 1)
         """
 
         if '.nii' in self.resPath:
