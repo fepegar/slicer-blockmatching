@@ -296,22 +296,22 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
 
         trsfType = self.getSelectedTransformationType()
 
-        cmd += ['-ref', self.refPath]
-        cmd += ['-flo', self.floPath]
-        cmd += ['-res', self.resPath]
-        cmd += ['-res-trsf', self.resultTransformPath]
-        cmd += ['-py-hl', str(self.pyramidHighestSpinBox.value)]
-        cmd += ['-py-ll', str(self.pyramidLowestSpinBox.value)]
-        cmd += ['-trsf-type', trsfType]
+        cmd += ['-reference', self.refPath]
+        cmd += ['-floating', self.floPath]
+        cmd += ['-result', self.resPath]
+        cmd += ['-result-transformation', self.resultTransformPath]
+        cmd += ['-pyramid-highest-level', str(self.pyramidHighestSpinBox.value)]
+        cmd += ['-pyramid-lowest-level', str(self.pyramidLowestSpinBox.value)]
+        cmd += ['-transformation-type', trsfType]
         cmd += ['-command-line', self.cmdPath]
 
         if self.pyramidGaussianFilteringCheckBox.isChecked():
-            cmd += ['-py-gf']
+            cmd += ['-pyramid-gaussian-filtering']
 
         if self.initialTransformNode:
             self.initialTransformPath = str(self.logic.getTempPath(self.tempDir, '.trsf'))
             self.logic.writeBaladinMatrix(self.initialTransformNode, self.initialTransformPath)
-            cmd += ['-init-trsf', self.initialTransformPath]
+            cmd += ['-initial-transformation', self.initialTransformPath]
             cmd += ['-composition-with-initial']
 
         self.commandLineList = cmd
