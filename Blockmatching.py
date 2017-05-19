@@ -330,6 +330,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
     def repareResults(self):
         """
         This is used to correct 2D images that should have size (si, sj, 1)
+        and to make tranform .hdr Analyze to NIfTI
         """
 
         if '.nii' in self.resPath:
@@ -343,7 +344,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
             sitk.WriteImage(resultImage, self.resPath)
 
         elif self.resPath.endswith('.hdr'):
-            print 'Correcting result .hdr  image'
+            print 'Correcting result .hdr image'
             shutil.copy(self.refPath, self.resPath)
 
 
