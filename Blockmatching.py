@@ -480,10 +480,11 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
                 # Newer versions of blockmatching return 0
                 # Apparently it always returns 0 :(
                 qt.QApplication.restoreOverrideCursor()
-                errorMessage = output[1]
-                # slicer.util.delayDisplay(errorMessage, autoCloseMsec=0)
+                errorMessage = ''
+                if not self.outputsExist():
+                    errorMessage += 'Output volume not written on the disk\n\n'
+                errorMessage += output[1]
                 slicer.util.errorDisplay(errorMessage, windowTitle="Registration error")
-                # raise ValueError(errorMessage)  # is this bad python?
             else:
                 tFin = time.time()
                 print '\nRegistration completed in {:.2f} seconds'.format(tFin - tIni)
@@ -507,6 +508,7 @@ class BlockmatchingLogic(ScriptedLoadableModuleLogic):
     def getTempPath(self, directory, ext, length=10, filename=None):
         if filename is None:
             filename = ''.join(random.choice(string.ascii_lowercase) for _ in range(length))
+        filename = filename.replace(' ', '_')  # avoid errors when running a command with spaces
         filename += ext
         return os.path.join(directory, filename)
 
