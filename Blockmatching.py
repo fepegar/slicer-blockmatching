@@ -1,18 +1,15 @@
 import os
-import imp
 import time
 import shutil
 import random
 import string
 import subprocess
-import collections
 
 import numpy as np
 import sitkUtils as su
 import SimpleITK as sitk
 from __main__ import vtk, qt, ctk, slicer
 from slicer.ScriptedLoadableModule import *
-import sys
 
 
 # BLOCKMATCHING_PATH = '/home/fernando/git/morpheme-privat/vt/build/bin/blockmatching'
