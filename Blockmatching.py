@@ -281,11 +281,11 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
 
         # We make sure they are in the disk
         if not self.refPath:
-            self.refPath = self.logic.getTempPath(self.tempDir, '.nii')
-            slicer.util.saveNode(self.referenceVolumeNode, self.refPath, filename=refName)
+            self.refPath = self.logic.getTempPath(self.tempDir, '.nii', filename=refName)
+            slicer.util.saveNode(self.referenceVolumeNode, self.refPath)
         if not self.floPath:
-            self.floPath = self.logic.getTempPath(self.tempDir, '.nii')
-            slicer.util.saveNode(self.floatingVolumeNode, self.floPath, filename=floName)
+            self.floPath = self.logic.getTempPath(self.tempDir, '.nii', filename=floName)
+            slicer.util.saveNode(self.floatingVolumeNode, self.floPath)
 
         self.resPath = self.logic.getTempPath(self.tempDir, '.nii', filename='{}_on_{}'.format(floName, refName))
         self.resultTransformPath = self.logic.getTempPath(self.tempDir, '.trsf', filename='ref-{}_flo-{}'.format(refName, floName))
