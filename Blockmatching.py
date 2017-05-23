@@ -604,17 +604,17 @@ class BlockmatchingLogic(ScriptedLoadableModuleLogic):
         shape = list(referenceImage.GetSize())
         shape.reverse()
 
+        # Example of 2D shape at this point: [1, 540, 940]
+
         # Blockmatching output might be 2D
         is2D = shape[0] == 1
-        if is2D:  # 2D
-            shape.append(2)
-        else:  # 3D
-            shape.append(3)
+        componentsPerVector = 2 if is2D else 3
+        shape.append(componentsPerVector)
         reshaped = stream.reshape(shape)
 
         # Force the output to be 3D
         if is2D:
-            zeros = np.zeros_like(reshaped[..., :1])
+            zeros = np.zeros_like(reshaped[..., :1])  # z component of the vectors
             reshaped = np.concatenate((reshaped, zeros), axis=3)
 
         reshaped[..., :2] *= -1  # RAS to LPS
