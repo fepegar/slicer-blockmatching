@@ -332,21 +332,10 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
 
     def repareResults(self):
         """
-        This is used to correct 2D images that should have size (si, sj, 1)
-        and to make tranform .hdr Analyze to NIfTI
+        This is used to convert output .hdr Analyze into NIfTI
         """
 
-        if '.nii' in self.resPath:
-            referenceImageData = self.referenceVolumeNode.GetImageData()
-            if referenceImageData.GetDimensions()[-1] != 1: return
-            print 'Correcting result .nii image'
-            referenceImage = su.PullFromSlicer(self.referenceVolumeNode.GetID())
-            resultImage = sitk.ReadImage(self.resPath)
-            resultImage.SetOrigin(referenceImage.GetOrigin())
-            resultImage.SetSpacing(referenceImage.GetSpacing())
-            sitk.WriteImage(resultImage, self.resPath)
-
-        elif self.resPath.endswith('.hdr'):
+        if self.resPath.endswith('.hdr'):
             print 'Correcting result .hdr image'
             shutil.copy(self.refPath, self.resPath)
 
@@ -392,11 +381,10 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
             self.floatingVolumeNode.SetAndObserveTransformNodeID(self.resultTransformNode.GetID())
             fgVolume = self.floatingVolumeNode
 
-        self.logic.setSlicesBackAndForeground(
-            bgVolume=self.referenceVolumeNode,
-            fgVolume=fgVolume,
-            opacity=0.5,
-            colors=True)
+        self.logic.setSlicesBackAndForeground(bgVolume=self.referenceVolumeNode,
+                                              fgVolume=fgVolume,
+                                              opacity=0.5,
+                                              colors=True)
 
         self.logic.centerViews()
 
