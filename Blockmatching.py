@@ -17,8 +17,7 @@ import sys
 
 # BLOCKMATCHING_PATH = '/home/fernando/git/morpheme-privat/vt/build/bin/blockmatching'
 BLOCKMATCHING_PATH = os.path.expanduser('~/bin/blockmatching')
-RESULT_NAME = 'Blockmatching result'
-ALIGN_CENTER = 4
+QT_ALIGN_CENTER = 4
 TRANSFORMATIONS = ['Rigid', 'Similitude', 'Affine', 'Vectorfield']
 
 
@@ -218,7 +217,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.pyramidHighestSpinBox.value = 3
         self.pyramidHighestSpinBox.valueChanged.connect(self.onPyramidLevelsChanged)
         self.pyramidHighestLabel = qt.QLabel()
-        self.pyramidHighestLabel.setAlignment(ALIGN_CENTER)
+        self.pyramidHighestLabel.setAlignment(QT_ALIGN_CENTER)
         self.pyramidLayout.addWidget(qt.QLabel('Highest:'), 0, 0)
         self.pyramidLayout.addWidget(self.pyramidHighestSpinBox, 0, 1)
         self.pyramidLayout.addWidget(self.pyramidHighestLabel, 0, 2)
@@ -227,7 +226,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.pyramidLowestSpinBox.value = 2
         self.pyramidLowestSpinBox.valueChanged.connect(self.onPyramidLevelsChanged)
         self.pyramidLowestLabel = qt.QLabel()
-        self.pyramidLowestLabel.setAlignment(ALIGN_CENTER)
+        self.pyramidLowestLabel.setAlignment(QT_ALIGN_CENTER)
         self.pyramidLayout.addWidget(qt.QLabel('Lowest:'), 1, 0)
         self.pyramidLayout.addWidget(self.pyramidLowestSpinBox, 1, 1)
         self.pyramidLayout.addWidget(self.pyramidLowestLabel, 1, 2)
@@ -319,6 +318,10 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
 
 
     def printCommandLine(self):
+        """
+        Pretty-prints the command line so that it can be copied from the Python
+        console and pasted on a terminal.
+        """
         prettyCmd = []
         for s in self.commandLineList:
             if s.startswith('-'):
@@ -513,9 +516,9 @@ class BlockmatchingLogic(ScriptedLoadableModuleLogic):
         return storageNode.GetFileName()
 
 
-    def getTempPath(self, directory, ext, filename=None):
+    def getTempPath(self, directory, ext, length=10, filename=None):
         if filename is None:
-            filename = ''.join(random.choice(string.ascii_lowercase) for _ in range(10))
+            filename = ''.join(random.choice(string.ascii_lowercase) for _ in range(length))
         filename += ext
         return os.path.join(directory, filename)
 
