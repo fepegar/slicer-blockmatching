@@ -515,7 +515,8 @@ class BlockmatchingLogic(ScriptedLoadableModuleLogic):
 
     def getTempPath(self, directory, ext, filename=None):
         if filename is None:
-            filename = ''.join(random.choice(string.ascii_lowercase) for _ in range(10)) + ext
+            filename = ''.join(random.choice(string.ascii_lowercase) for _ in range(10))
+        filename += ext
         return os.path.join(directory, filename)
 
 
