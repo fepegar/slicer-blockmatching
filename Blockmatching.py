@@ -289,11 +289,11 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.resPath = self.logic.getTempPath(self.tempDir, '.nii', filename='{}_on_{}'.format(floName, refName))
         self.resultTransformPath = self.logic.getTempPath(self.tempDir, '.trsf', filename='ref-{}_flo-{}'.format(refName, floName))
 
-        # Save the command line for debugging
-        self.cmdPath = self.logic.getTempPath(self.tempDir, '.txt', filename='cmd_ref-{}_flo-{}'.format(refName, floName))
-        self.logPath = self.logic.getTempPath(self.tempDir, '.txt', filename='log_ref-{}_flo-{}'.format(refName, floName))
-
         trsfType = self.getSelectedTransformationType()
+
+        # Save the command line for debugging
+        self.cmdPath = self.logic.getTempPath(self.tempDir, '.txt', filename='cmd_ref-{}_flo-{}_{}'.format(refName, floName, trsfType))
+        self.logPath = self.logic.getTempPath(self.tempDir, '.txt', filename='log_ref-{}_flo-{}_{}'.format(refName, floName, trsfType))
 
         cmd += ['-reference', self.refPath]
         cmd += ['-floating', self.floPath]
