@@ -389,8 +389,10 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
                 self.resultTransformNode.SetName(resultTransformName)
                 self.resultTransformSelector.setCurrentNode(self.resultTransformNode)
 
-            self.floatingVolumeNode.SetAndObserveTransformNodeID(self.resultTransformNode.GetID())
-            fgVolume = self.floatingVolumeNode
+            # Apply transformation to floating if no result volume node was selected
+            if self.resultVolumeNode is None:
+                self.floatingVolumeNode.SetAndObserveTransformNodeID(self.resultTransformNode.GetID())
+                fgVolume = self.floatingVolumeNode
 
         self.logic.setSlicesBackAndForeground(
             bgVolume=self.referenceVolumeNode,
