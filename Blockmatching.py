@@ -44,7 +44,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         ScriptedLoadableModuleWidget.setup(self)
         self.logic = BlockmatchingLogic()
         self.makeGUI()
-        self.onInputVolumeChanged()
+        self.onInputModified()
         self.onTransformationTypeChanged()
 
 
@@ -128,7 +128,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.referenceSelector.showHidden = False
         self.referenceSelector.showChildNodeTypes = True
         self.referenceSelector.setMRMLScene(slicer.mrmlScene)
-        self.referenceSelector.currentNodeChanged.connect(self.onInputVolumeChanged)
+        self.referenceSelector.currentNodeChanged.connect(self.onInputModified)
         self.inputsLayout.addRow("Reference: ", self.referenceSelector)
 
 
@@ -142,7 +142,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.floatingSelector.showHidden = True
         self.floatingSelector.showChildNodeTypes = True
         self.floatingSelector.setMRMLScene(slicer.mrmlScene)
-        self.floatingSelector.currentNodeChanged.connect(self.onInputVolumeChanged)
+        self.floatingSelector.currentNodeChanged.connect(self.onInputModified)
         self.inputsLayout.addRow("Floating: ", self.floatingSelector)
 
 
@@ -157,7 +157,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.initialTransformSelector.showChildNodeTypes = True
         self.initialTransformSelector.setMRMLScene(slicer.mrmlScene)
         self.initialTransformSelector.baseName = 'Initial transform'
-        self.initialTransformSelector.currentNodeChanged.connect(self.onInputVolumeChanged)
+        self.initialTransformSelector.currentNodeChanged.connect(self.onInputModified)
         self.inputsLayout.addRow("Initial transform: ", self.initialTransformSelector)
 
 
@@ -179,7 +179,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.resultTransformSelector.showHidden = False
         self.resultTransformSelector.showChildNodeTypes = True
         self.resultTransformSelector.setMRMLScene(slicer.mrmlScene)
-        self.resultTransformSelector.currentNodeChanged.connect(self.onInputVolumeChanged)
+        self.resultTransformSelector.currentNodeChanged.connect(self.onInputModified)
         self.outputsLayout.addRow("Result transform: ", self.resultTransformSelector)
 
 
@@ -194,7 +194,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.resultVolumeSelector.showHidden = False
         self.resultVolumeSelector.showChildNodeTypes = True
         self.resultVolumeSelector.setMRMLScene(slicer.mrmlScene)
-        self.resultVolumeSelector.currentNodeChanged.connect(self.onInputVolumeChanged)
+        self.resultVolumeSelector.currentNodeChanged.connect(self.onInputModified)
         self.outputsLayout.addRow("Result volume: ", self.resultVolumeSelector)
 
 
@@ -255,18 +255,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         return trsfType
 
 
-    def readParameters(self):
-        self.referenceVolumeNode = self.referenceSelector.currentNode()
-        self.floatingVolumeNode = self.floatingSelector.currentNode()
-        self.initialTransformNode = self.initialTransformSelector.currentNode()
-
-        self.resultVolumeNode = self.resultVolumeSelector.currentNode()
-        self.resultTransformNode = self.resultTransformSelector.currentNode()
-
-
     def getCommandLineList(self):
-        cmd = [BLOCKMATCHING_PATH]
-
         self.tempDir = str(slicer.util.tempDirectory())
 
         self.refPath = self.logic.getNodeFilepath(self.referenceVolumeNode)
@@ -286,12 +275,13 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.resPath = self.logic.getTempPath(self.tempDir, '.nii', filename='{}_on_{}'.format(floName, refName))
         self.resultTransformPath = self.logic.getTempPath(self.tempDir, '.trsf', filename='ref-{}_flo-{}'.format(refName, floName))
 
-        # Save the command line for debugging
-        self.cmdPath = self.logic.getTempPath(self.tempDir, '.txt', filename='cmd_ref-{}_flo-{}'.format(refName, floName))
-        self.logPath = self.logic.getTempPath(self.tempDir, '.txt', filename='log_ref-{}_flo-{}'.format(refName, floName))
-
         trsfType = self.getSelectedTransformationType()
 
+        # Save the command line for debugging
+        self.cmdPath = self.logic.getTempPath(self.tempDir, '.txt', filename='cmd_ref-{}_flo-{}_{}'.format(refName, floName, trsfType))
+        self.logPath = self.logic.getTempPath(self.tempDir, '.txt', filename='log_ref-{}_flo-{}_{}'.format(refName, floName, trsfType))
+
+        cmd = [BLOCKMATCHING_PATH]
         cmd += ['-reference', self.refPath]
         cmd += ['-floating', self.floPath]
         cmd += ['-result', self.resPath]
@@ -375,8 +365,10 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
                 self.resultTransformNode.SetName(resultTransformName)
                 self.resultTransformSelector.setCurrentNode(self.resultTransformNode)
 
-            self.floatingVolumeNode.SetAndObserveTransformNodeID(self.resultTransformNode.GetID())
-            fgVolume = self.floatingVolumeNode
+            # Apply transform to floating if no result volume node was selected
+            if self.resultVolumeNode is None:
+                self.floatingVolumeNode.SetAndObserveTransformNodeID(self.resultTransformNode.GetID())
+                fgVolume = self.floatingVolumeNode
 
         self.logic.setSlicesBackAndForeground(bgVolume=self.referenceVolumeNode,
                                               fgVolume=fgVolume,
@@ -425,8 +417,17 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.validateMatrices()
 
 
+    def readParameters(self):
+        self.referenceVolumeNode = self.referenceSelector.currentNode()
+        self.floatingVolumeNode = self.floatingSelector.currentNode()
+        self.initialTransformNode = self.initialTransformSelector.currentNode()
+
+        self.resultVolumeNode = self.resultVolumeSelector.currentNode()
+        self.resultTransformNode = self.resultTransformSelector.currentNode()
+
+
     ### Signals ###
-    def onInputVolumeChanged(self):
+    def onInputModified(self):
         self.readParameters()
         validMinimumInputs = self.referenceVolumeNode and \
                              self.floatingVolumeNode and \
@@ -505,7 +506,11 @@ class BlockmatchingLogic(ScriptedLoadableModuleLogic):
     def getTempPath(self, directory, ext, length=10, filename=None):
         if filename is None:
             filename = ''.join(random.choice(string.ascii_lowercase) for _ in range(length))
+<<<<<<< HEAD
         filename = filename.replace(' ', '_')  # avoid errors when running a command with spaces
+=======
+        filename = filename.replace(' ', '_')
+>>>>>>> 40bd0b139ca81ab54b8966e22bc110b66aef5a35
         filename += ext
         return os.path.join(directory, filename)
 
