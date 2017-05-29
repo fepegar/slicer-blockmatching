@@ -506,11 +506,7 @@ class BlockmatchingLogic(ScriptedLoadableModuleLogic):
     def getTempPath(self, directory, ext, length=10, filename=None):
         if filename is None:
             filename = ''.join(random.choice(string.ascii_lowercase) for _ in range(length))
-<<<<<<< HEAD
         filename = filename.replace(' ', '_')  # avoid errors when running a command with spaces
-=======
-        filename = filename.replace(' ', '_')
->>>>>>> 40bd0b139ca81ab54b8966e22bc110b66aef5a35
         filename += ext
         return os.path.join(directory, filename)
 
