@@ -3,6 +3,7 @@ import time
 import shutil
 import random
 import string
+import datetime
 import subprocess
 
 import numpy as np
@@ -264,23 +265,43 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         refName = self.referenceVolumeNode.GetName()
         floName = self.floatingVolumeNode.GetName()
 
+        dateTime = datetime.datetime.now()
+
         # We make sure they are in the disk
         if not self.refPath or not self.logic.hasNiftiExtension(self.refPath):
-            self.refPath = self.logic.getTempPath(self.tempDir, '.nii', filename=refName)
+            self.refPath = self.logic.getTempPath(self.tempDir,
+                                                  '.nii',
+                                                  filename=refName,
+                                                  dateTime=dateTime)
             slicer.util.saveNode(self.referenceVolumeNode, self.refPath)
         if not self.floPath or not self.logic.hasNiftiExtension(self.floPath):
-            self.floPath = self.logic.getTempPath(self.tempDir, '.nii', filename=floName)
+            self.floPath = self.logic.getTempPath(self.tempDir,
+                                                  '.nii',
+                                                  filename=floName,
+                                                  dateTime=dateTime)
             slicer.util.saveNode(self.floatingVolumeNode, self.floPath)
 
 
-        self.resPath = self.logic.getTempPath(self.tempDir, '.nii', filename='{}_on_{}'.format(floName, refName))
-        self.resultTransformPath = self.logic.getTempPath(self.tempDir, '.trsf', filename='t_ref-{}_flo-{}'.format(refName, floName))
+        self.resPath = self.logic.getTempPath(self.tempDir,
+                                              '.nii',
+                                              filename='{}_on_{}'.format(floName, refName),
+                                              dateTime=dateTime)
+        self.resultTransformPath = self.logic.getTempPath(self.tempDir,
+                                                          '.trsf',
+                                                          filename='t_ref-{}_flo-{}'.format(refName, floName),
+                                                          dateTime=dateTime)
 
         trsfType = self.getSelectedTransformationType()
 
         # Save the command line for debugging
-        self.cmdPath = self.logic.getTempPath(self.tempDir, '.txt', filename='cmd_ref-{}_flo-{}_{}'.format(refName, floName, trsfType))
-        self.logPath = self.logic.getTempPath(self.tempDir, '.txt', filename='log_ref-{}_flo-{}_{}'.format(refName, floName, trsfType))
+        self.cmdPath = self.logic.getTempPath(self.tempDir,
+                                              '.txt',
+                                              filename='cmd_ref-{}_flo-{}_{}'.format(refName, floName, trsfType),
+                                              dateTime=dateTime)
+        self.logPath = self.logic.getTempPath(self.tempDir,
+                                              '.txt',
+                                              filename='log_ref-{}_flo-{}_{}'.format(refName, floName, trsfType),
+                                              dateTime=dateTime)
 
         cmd = [BLOCKMATCHING_PATH]
         cmd += ['-reference', self.refPath]
@@ -297,7 +318,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
             cmd += ['-pyramid-gaussian-filtering']
 
         if self.initialTransformNode:
-            self.initialTransformPath = str(self.logic.getTempPath(self.tempDir, '.trsf'))
+            self.initialTransformPath = str(self.logic.getTempPath(self.tempDir, '.trsf', dateTime=dateTime))
             self.logic.writeBaladinMatrix(self.initialTransformNode, self.initialTransformPath)
             cmd += ['-initial-transformation', self.initialTransformPath]
             cmd += ['-composition-with-initial']
@@ -508,11 +529,13 @@ class BlockmatchingLogic(ScriptedLoadableModuleLogic):
             return storageNode.GetFileName()
 
 
-    def getTempPath(self, directory, ext, length=10, filename=None):
+    def getTempPath(self, directory, ext, length=10, filename=None, dateTime=None):
         if filename is None:
             filename = ''.join(random.choice(string.ascii_lowercase) for _ in range(length))
         filename = filename.replace(' ', '_')  # avoid errors when running a command with spaces
         filename += ext
+        if dateTime is not None:
+            filename = '{}_{}'.format(dateTime.strftime("%Y%m%d_%H%M%S"), filename)
         return os.path.join(directory, filename)
 
 
