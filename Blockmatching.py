@@ -272,6 +272,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
             self.floPath = self.logic.getTempPath(self.tempDir, '.nii', filename=floName)
             slicer.util.saveNode(self.floatingVolumeNode, self.floPath)
 
+
         self.resPath = self.logic.getTempPath(self.tempDir, '.nii', filename='{}_on_{}'.format(floName, refName))
         self.resultTransformPath = self.logic.getTempPath(self.tempDir, '.trsf', filename='t_ref-{}_flo-{}'.format(refName, floName))
 
@@ -500,7 +501,10 @@ class BlockmatchingLogic(ScriptedLoadableModuleLogic):
 
     def getNodeFilepath(self, node):
         storageNode = node.GetStorageNode()
-        return storageNode.GetFileName()
+        if storageNode is None:
+            return None
+        else:
+            return storageNode.GetFileName()
 
 
     def getTempPath(self, directory, ext, length=10, filename=None):
