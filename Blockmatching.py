@@ -273,7 +273,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
             slicer.util.saveNode(self.floatingVolumeNode, self.floPath)
 
         self.resPath = self.logic.getTempPath(self.tempDir, '.nii', filename='{}_on_{}'.format(floName, refName))
-        self.resultTransformPath = self.logic.getTempPath(self.tempDir, '.trsf', filename='ref-{}_flo-{}'.format(refName, floName))
+        self.resultTransformPath = self.logic.getTempPath(self.tempDir, '.trsf', filename='t_ref-{}_flo-{}'.format(refName, floName))
 
         trsfType = self.getSelectedTransformationType()
 
