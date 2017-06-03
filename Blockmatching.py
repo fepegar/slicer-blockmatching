@@ -265,10 +265,10 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         floName = self.floatingVolumeNode.GetName()
 
         # We make sure they are in the disk
-        if not self.refPath:
+        if not self.refPath or not self.logic.hasNiftiExtension(self.refPath):
             self.refPath = self.logic.getTempPath(self.tempDir, '.nii', filename=refName)
             slicer.util.saveNode(self.referenceVolumeNode, self.refPath)
-        if not self.floPath:
+        if not self.floPath or not self.logic.hasNiftiExtension(self.floPath):
             self.floPath = self.logic.getTempPath(self.tempDir, '.nii', filename=floName)
             slicer.util.saveNode(self.floatingVolumeNode, self.floPath)
 
@@ -687,3 +687,10 @@ class BlockmatchingLogic(ScriptedLoadableModuleLogic):
                 lastLevel = True
 
         return shapesMap
+
+
+    def hasNiftiExtension(self, path):
+        for ext in '.hdr', '.img', '.img.gz', '.nii', '.nii.gz':
+            if path.endswith(ext):
+                return True
+        return False
