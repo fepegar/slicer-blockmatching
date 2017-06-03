@@ -475,6 +475,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
             qt.QApplication.setOverrideCursor(qt.Qt.WaitCursor)
             p = subprocess.Popen(self.commandLineList, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             output = p.communicate()
+            print '\nBlockmatching returned {}'.format(p.returncode)
             if p.returncode != 0 or not self.outputsExist():
                 # Newer versions of blockmatching return 0
                 # Apparently it always returns 0 :(
