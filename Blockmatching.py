@@ -113,7 +113,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
 
     def makeInputsButton(self):
         self.inputsCollapsibleButton = ctk.ctkCollapsibleButton()
-        self.inputsCollapsibleButton.text = 'Volumes'
+        self.inputsCollapsibleButton.text = 'Inputs'
         self.layout.addWidget(self.inputsCollapsibleButton)
 
         self.inputsLayout = qt.QFormLayout(self.inputsCollapsibleButton)
