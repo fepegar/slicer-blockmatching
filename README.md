@@ -15,9 +15,7 @@ In `~/.slicerrc.py`:
 
 ```
 import os
-
 import qt
-import slicer
 
 moduleFactory = slicer.app.moduleManager().factoryManager()
  
