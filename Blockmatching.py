@@ -717,3 +717,13 @@ class BlockmatchingLogic(ScriptedLoadableModuleLogic):
             if path.endswith(ext):
                 return True
         return False
+
+
+    def is2D(self, volumeNode):
+        if volumeNode is None: return
+        imageData = volumeNode.GetImageData()
+        if imageData is None: return
+        dimensions = imageData.GetDimensions()
+        thirdDimension = dimensions[2]
+        is2D = thirdDimension == 1
+        return is2D
