@@ -360,7 +360,14 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
             slicer.mrmlScene.RemoveNode(self.resultVolumeNode)
 
             # Load the new one
-            self.resultVolumeNode = slicer.util.loadVolume(self.resPath, returnNode=True)[1]
+            # When loading a 2D image with slicer.util, there is a bug that
+            # keeps stacking the output result instead of creating a 2D image
+            if self.logic.is2D(self.referenceVolumeNode):  # load using SimpleITK
+                resultImage = sitk.ReadImage(self.resPath)
+                su.PushToSlicer(resultImage, resultName, overwrite=True)
+                self.resultVolumeNode = slicer.util.getNode(resultName)
+            else:  # load using slicer.util.loadVolume()
+                self.resultVolumeNode = slicer.util.loadVolume(self.resPath, returnNode=True)[1]
             self.resultVolumeNode.SetName(resultName)
             self.resultVolumeSelector.setCurrentNode(self.resultVolumeNode)
             fgVolume = self.resultVolumeNode
