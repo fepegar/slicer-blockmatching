@@ -203,13 +203,16 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.parametersCollapsibleButton = ctk.ctkCollapsibleButton()
         self.parametersCollapsibleButton.text = 'Parameters'
         self.layout.addWidget(self.parametersCollapsibleButton)
-        self.parametersLayout = qt.QFormLayout(self.parametersCollapsibleButton)
+        self.parametersLayout = qt.QVBoxLayout(self.parametersCollapsibleButton)
 
         self.makeTransformationTypeWidgets()
+        self.makePyramidWidgets()
 
-        self.pyramidGroupBox = qt.QGroupBox()
+
+    def makePyramidWidgets(self):
+        self.pyramidGroupBox = qt.QGroupBox('Pyramid levels')
         self.pyramidLayout = qt.QGridLayout(self.pyramidGroupBox)
-        self.parametersLayout.addRow('Pyramid levels:', self.pyramidGroupBox)
+        self.parametersLayout.addWidget(self.pyramidGroupBox)
 
         self.pyramidHighestSpinBox = qt.QSpinBox()
         self.pyramidHighestSpinBox.value = 3
@@ -235,8 +238,8 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
 
 
     def makeTransformationTypeWidgets(self):
-        self.trsfTypeGroupBox = qt.QGroupBox()
-        self.parametersLayout.addRow('Transformation type:', self.trsfTypeGroupBox)
+        self.trsfTypeGroupBox = qt.QGroupBox('Transformation type')
+        self.parametersLayout.addWidget(self.trsfTypeGroupBox)
         trsfTypeLayout = qt.QHBoxLayout(self.trsfTypeGroupBox)
 
         self.trsfTypeRadioButtons = []
