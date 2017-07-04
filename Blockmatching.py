@@ -274,6 +274,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
                                                   filename=refName,
                                                   dateTime=dateTime)
             slicer.util.saveNode(self.referenceVolumeNode, self.refPath)
+
         if not self.floPath or not self.logic.hasNiftiExtension(self.floPath):
             self.floPath = self.logic.getTempPath(self.tempDir,
                                                   '.nii',
@@ -428,6 +429,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         floQFormCode, floSFormCode = self.logic.getQFormAndSFormCodes(self.floatingVolumeNode)
         validCodes = 1, 2, 3
         if refQFormCode != 0 and floQFormCode != 0: return
+
         messages = ['Registration results might be unexpected:', '\n']
         if refQFormCode not in validCodes:
             messages.append('Reference image does not have a valid qform_code: {}'.format(refQFormCode))
@@ -442,9 +444,29 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
             slicer.util.warningDisplay('Reference and floating images are the same')
 
 
+    def validateDataTypes(self):
+        refDouble = self.logic.isDouble(self.referenceVolumeNode)
+        floDouble = self.logic.isDouble(self.floatingVolumeNode)
+
+        if not refDouble and not floDouble:
+            return True
+
+        messages = ['Data type not handled yet:', '\n']
+        if refDouble:
+            messages.append('Reference image does not have a valid data type')
+        if floDouble:
+            messages.append('Floating image does not have a valid data type')
+        message = '\n'.join(messages)
+        slicer.util.errorDisplay(message)
+        return False
+
+
     def validateParameters(self):
+        validDataTypes = self.validateDataTypes()
         self.validateRefIsFloating()
         self.validateMatrices()
+
+        return validDataTypes
 
 
     def readParameters(self):
@@ -496,7 +518,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
     def onApply(self):
         self.readParameters()
         self.getCommandLineList()
-        self.validateParameters()
+        if not self.validateParameters(): return
         print '\n\n'
         self.printCommandLine()
         tIni = time.time()
@@ -672,12 +694,17 @@ class BlockmatchingLogic(ScriptedLoadableModuleLogic):
         return imageData
 
 
-    def getQFormAndSFormCodes(self, volumeNode):
+    def getNIFTIHeader(self, volumeNode):
         reader = vtk.vtkNIFTIImageReader()
         filepath = self.getNodeFilepath(volumeNode)
         reader.SetFileName(filepath)
         reader.Update()
         header = reader.GetNIFTIHeader()
+        return header
+
+
+    def getQFormAndSFormCodes(self, volumeNode):
+        header = self.getNIFTIHeader(volumeNode)
         qform_code = header.GetQFormCode()
         sform_code = header.GetSFormCode()
         return qform_code, sform_code
@@ -735,3 +762,8 @@ class BlockmatchingLogic(ScriptedLoadableModuleLogic):
         thirdDimension = dimensions[2]
         is2D = thirdDimension == 1
         return is2D
+
+
+    def isDouble(self, volumeNode):
+        header = self.getNIFTIHeader(volumeNode)
+        return header.GetDataType() == 64
