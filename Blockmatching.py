@@ -15,7 +15,7 @@ from slicer.ScriptedLoadableModule import *
 
 # BLOCKMATCHING_PATH = '/home/fernando/git/morpheme-privat/vt/build/bin/blockmatching'
 BLOCKMATCHING_PATH = os.path.expanduser('~/bin/blockmatching')
-QT_ALIGN_CENTER = 4
+QT_ALIGN_CENTER = qt.Qt.AlignCenter
 TRANSFORMATIONS = ['Rigid', 'Similitude', 'Affine', 'Vectorfield']
 
 
