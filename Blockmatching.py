@@ -442,7 +442,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
             slicer.util.warningDisplay('Reference and floating images are the same')
 
 
-    def showWarnings(self):
+    def validateParameters(self):
         self.validateRefIsFloating()
         self.validateMatrices()
 
@@ -496,7 +496,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
     def onApply(self):
         self.readParameters()
         self.getCommandLineList()
-        self.showWarnings()
+        self.validateParameters()
         print '\n\n'
         self.printCommandLine()
         tIni = time.time()
