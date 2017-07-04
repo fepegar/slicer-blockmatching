@@ -426,12 +426,13 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
     def validateMatrices(self):
         refQFormCode, refSFormCode = self.logic.getQFormAndSFormCodes(self.referenceVolumeNode)
         floQFormCode, floSFormCode = self.logic.getQFormAndSFormCodes(self.floatingVolumeNode)
+        validCodes = 1, 2, 3
         if refQFormCode != 0 and floQFormCode != 0: return
         messages = ['Registration results might be unexpected:', '\n']
-        if refQFormCode == 0:
-            messages.append('Reference image does not have a valid qform_code')
-        if floQFormCode == 0:
-            messages.append('Floating image does not have a valid qform_code')
+        if refQFormCode not in validCodes:
+            messages.append('Reference image does not have a valid qform_code: {}'.format(refQFormCode))
+        if floQFormCode not in validCodes:
+            messages.append('Floating image does not have a valid qform_code: {}'.format(floQFormCode))
         message = '\n'.join(messages)
         slicer.util.warningDisplay(message)
 
