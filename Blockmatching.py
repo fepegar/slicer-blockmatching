@@ -14,7 +14,6 @@ from slicer.ScriptedLoadableModule import *
 
 
 BLOCKMATCHING_PATH = os.path.expanduser('~/bin/blockmatching')
-QT_ALIGN_CENTER = qt.Qt.AlignCenter
 TRANSFORMATIONS = ['Rigid', 'Similitude', 'Affine', 'Vectorfield']
 
 
@@ -217,7 +216,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.pyramidHighestSpinBox.value = 3
         self.pyramidHighestSpinBox.valueChanged.connect(self.onPyramidLevelsChanged)
         self.pyramidHighestLabel = qt.QLabel()
-        self.pyramidHighestLabel.setAlignment(QT_ALIGN_CENTER)
+        self.pyramidHighestLabel.setAlignment(qt.Qt.AlignCenter)
         self.pyramidLayout.addWidget(qt.QLabel('Highest:'), 0, 0)
         self.pyramidLayout.addWidget(self.pyramidHighestSpinBox, 0, 1)
         self.pyramidLayout.addWidget(self.pyramidHighestLabel, 0, 2)
@@ -226,7 +225,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.pyramidLowestSpinBox.value = 2
         self.pyramidLowestSpinBox.valueChanged.connect(self.onPyramidLevelsChanged)
         self.pyramidLowestLabel = qt.QLabel()
-        self.pyramidLowestLabel.setAlignment(QT_ALIGN_CENTER)
+        self.pyramidLowestLabel.setAlignment(qt.Qt.AlignCenter)
         self.pyramidLayout.addWidget(qt.QLabel('Lowest:'), 1, 0)
         self.pyramidLayout.addWidget(self.pyramidLowestSpinBox, 1, 1)
         self.pyramidLayout.addWidget(self.pyramidLowestLabel, 1, 2)
