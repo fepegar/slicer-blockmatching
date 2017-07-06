@@ -209,6 +209,21 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.makePyramidWidgets()
 
 
+    def makeTransformationTypeWidgets(self):
+        self.trsfTypeTab = qt.QWidget()
+        self.parametersTabWidget.addTab(self.trsfTypeTab, 'Transformation type')
+        trsfTypeLayout = qt.QHBoxLayout(self.trsfTypeTab)
+
+        self.trsfTypeRadioButtons = []
+        for trsfType in TRANSFORMATIONS:
+            radioButton = qt.QRadioButton(trsfType)
+            radioButton.clicked.connect(self.onTransformationTypeChanged)
+            self.trsfTypeRadioButtons.append(radioButton)
+            trsfTypeLayout.addWidget(radioButton)
+
+        self.trsfTypeRadioButtons[0].setChecked(True)
+
+
     def makePyramidWidgets(self):
         self.pyramidTypeTab = qt.QWidget()
         self.parametersTabWidget.addTab(self.pyramidTypeTab, 'Pyramid levels')
@@ -237,21 +252,6 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.pyramidGaussianFilteringCheckBox = qt.QCheckBox()
         self.pyramidLayout.addWidget(qt.QLabel('Gaussian filtering:'), 2, 0)
         self.pyramidLayout.addWidget(self.pyramidGaussianFilteringCheckBox, 2, 1)
-
-
-    def makeTransformationTypeWidgets(self):
-        self.trsfTypeTab = qt.QWidget()
-        self.parametersTabWidget.addTab(self.trsfTypeTab, 'Transformation type')
-        trsfTypeLayout = qt.QHBoxLayout(self.trsfTypeTab)
-
-        self.trsfTypeRadioButtons = []
-        for trsfType in TRANSFORMATIONS:
-            radioButton = qt.QRadioButton(trsfType)
-            radioButton.clicked.connect(self.onTransformationTypeChanged)
-            self.trsfTypeRadioButtons.append(radioButton)
-            trsfTypeLayout.addWidget(radioButton)
-
-        self.trsfTypeRadioButtons[0].setChecked(True)
 
 
     def getSelectedTransformationType(self):
