@@ -115,7 +115,6 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
 
         self.inputsLayout = qt.QFormLayout(self.inputsCollapsibleButton)
 
-
         # Reference
         self.referenceSelector = slicer.qMRMLNodeComboBox()
         self.referenceSelector.nodeTypes = ["vtkMRMLScalarVolumeNode"]
@@ -129,7 +128,6 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.referenceSelector.currentNodeChanged.connect(self.onInputModified)
         self.inputsLayout.addRow("Reference: ", self.referenceSelector)
 
-
         # Floating
         self.floatingSelector = slicer.qMRMLNodeComboBox()
         self.floatingSelector.nodeTypes = ["vtkMRMLScalarVolumeNode"]
@@ -142,7 +140,6 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.floatingSelector.setMRMLScene(slicer.mrmlScene)
         self.floatingSelector.currentNodeChanged.connect(self.onInputModified)
         self.inputsLayout.addRow("Floating: ", self.floatingSelector)
-
 
         # Initial transform
         self.initialTransformSelector = slicer.qMRMLNodeComboBox()
@@ -207,6 +204,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
 
         self.makeTransformationTypeWidgets()
         self.makePyramidWidgets()
+        self.makeThresholdsWidgets()
 
 
     def makeTransformationTypeWidgets(self):
@@ -252,6 +250,20 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.pyramidGaussianFilteringCheckBox = qt.QCheckBox()
         self.pyramidLayout.addWidget(qt.QLabel('Gaussian filtering:'), 2, 0)
         self.pyramidLayout.addWidget(self.pyramidGaussianFilteringCheckBox, 2, 1)
+
+
+    def makeThresholdsWidgets(self):
+        self.thresholdsTab = qt.QWidget()
+        self.parametersTabWidget.addTab(self.thresholdsTab, 'Thresholds')
+        self.thresholdsLayout = qt.QFormLayout(self.thresholdsTab)
+
+        self.referenceThresholdSlider = ctk.ctkRangeWidget()
+        self.referenceThresholdSlider.decimals = 0
+        self.thresholdsLayout.addRow('Reference: ', self.referenceThresholdSlider)
+
+        self.floatingThresholdSlider = ctk.ctkRangeWidget()
+        self.floatingThresholdSlider.decimals = 0
+        self.thresholdsLayout.addRow('Floating: ', self.floatingThresholdSlider)
 
 
     def getSelectedTransformationType(self):
