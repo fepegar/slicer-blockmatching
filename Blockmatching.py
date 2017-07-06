@@ -94,7 +94,6 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         [-trace|-no-trace]
         [-print-parameters|-param]
         [-print-time|-time] [-no-time|-notime]
-
         """
 
         self.makeInputsButton()
@@ -201,19 +200,23 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.parametersCollapsibleButton = ctk.ctkCollapsibleButton()
         self.parametersCollapsibleButton.text = 'Parameters'
         self.layout.addWidget(self.parametersCollapsibleButton)
+
         self.parametersLayout = qt.QVBoxLayout(self.parametersCollapsibleButton)
+        self.parametersTabWidget = qt.QTabWidget()
+        self.parametersLayout.addWidget(self.parametersTabWidget)
 
         self.makeTransformationTypeWidgets()
         self.makePyramidWidgets()
 
 
     def makePyramidWidgets(self):
-        self.pyramidGroupBox = qt.QGroupBox('Pyramid levels')
-        self.pyramidLayout = qt.QGridLayout(self.pyramidGroupBox)
-        self.parametersLayout.addWidget(self.pyramidGroupBox)
+        self.pyramidTypeTab = qt.QWidget()
+        self.parametersTabWidget.addTab(self.pyramidTypeTab, 'Pyramid levels')
+        self.pyramidLayout = qt.QGridLayout(self.pyramidTypeTab)
 
         self.pyramidHighestSpinBox = qt.QSpinBox()
         self.pyramidHighestSpinBox.value = 3
+        self.pyramidHighestSpinBox.setAlignment(qt.Qt.AlignCenter)
         self.pyramidHighestSpinBox.valueChanged.connect(self.onPyramidLevelsChanged)
         self.pyramidHighestLabel = qt.QLabel()
         self.pyramidHighestLabel.setAlignment(qt.Qt.AlignCenter)
@@ -223,6 +226,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
 
         self.pyramidLowestSpinBox = qt.QSpinBox()
         self.pyramidLowestSpinBox.value = 2
+        self.pyramidLowestSpinBox.setAlignment(qt.Qt.AlignCenter)
         self.pyramidLowestSpinBox.valueChanged.connect(self.onPyramidLevelsChanged)
         self.pyramidLowestLabel = qt.QLabel()
         self.pyramidLowestLabel.setAlignment(qt.Qt.AlignCenter)
@@ -236,9 +240,9 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
 
 
     def makeTransformationTypeWidgets(self):
-        self.trsfTypeGroupBox = qt.QGroupBox('Transformation type')
-        self.parametersLayout.addWidget(self.trsfTypeGroupBox)
-        trsfTypeLayout = qt.QHBoxLayout(self.trsfTypeGroupBox)
+        self.trsfTypeTab = qt.QWidget()
+        self.parametersTabWidget.addTab(self.trsfTypeTab, 'Transformation type')
+        trsfTypeLayout = qt.QHBoxLayout(self.trsfTypeTab)
 
         self.trsfTypeRadioButtons = []
         for trsfType in TRANSFORMATIONS:
