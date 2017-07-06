@@ -225,9 +225,9 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
 
 
     def makePyramidWidgets(self):
-        self.pyramidTypeTab = qt.QWidget()
-        self.parametersTabWidget.addTab(self.pyramidTypeTab, 'Pyramid levels')
-        self.pyramidLayout = qt.QGridLayout(self.pyramidTypeTab)
+        self.pyramidTab = qt.QWidget()
+        self.parametersTabWidget.addTab(self.pyramidTab, 'Pyramid levels')
+        self.pyramidLayout = qt.QGridLayout(self.pyramidTab)
 
         self.pyramidHighestSpinBox = qt.QSpinBox()
         self.pyramidHighestSpinBox.value = 3
