@@ -521,6 +521,10 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
 
 
     def onPyramidLevelsChanged(self):
+
+        def getShapeString(shape):
+            return ' x '.join([str(n) for n in shape])
+
         self.pyramidLowestSpinBox.maximum = self.pyramidHighestSpinBox.value
         self.pyramidHighestSpinBox.minimum = self.pyramidLowestSpinBox.value
 
@@ -528,8 +532,10 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
             self.pyramidHighestLabel.text = ''
             self.pyramidLowestLabel.text = ''
         else:
-            self.pyramidHighestLabel.text = self.referencePyramidMap[self.pyramidHighestSpinBox.value]
-            self.pyramidLowestLabel.text = self.referencePyramidMap[self.pyramidLowestSpinBox.value]
+            highestLevelShape = self.referencePyramidMap[self.pyramidHighestSpinBox.value]
+            lowestLevelShape = self.referencePyramidMap[self.pyramidLowestSpinBox.value]
+            self.pyramidHighestLabel.text = getShapeString(highestLevelShape)
+            self.pyramidLowestLabel.text = getShapeString(lowestLevelShape)
 
 
     def onApply(self):
