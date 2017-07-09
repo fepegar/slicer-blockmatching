@@ -43,8 +43,8 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         ScriptedLoadableModuleWidget.setup(self)
         self.logic = BlockmatchingLogic()
         self.makeGUI()
-        self.onInputModified()
         self.onTransformationTypeChanged()
+        self.onInputModified()
 
 
     def makeGUI(self):
@@ -259,10 +259,12 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
 
         self.referenceThresholdSlider = ctk.ctkRangeWidget()
         self.referenceThresholdSlider.decimals = 0
+        self.referenceThresholdSlider.valuesChanged.connect(self.onReferenceThresholdSlider)
         self.thresholdsLayout.addRow('Reference: ', self.referenceThresholdSlider)
 
         self.floatingThresholdSlider = ctk.ctkRangeWidget()
         self.floatingThresholdSlider.decimals = 0
+        self.floatingThresholdSlider.valuesChanged.connect(self.onFloatingThresholdSlider)
         self.thresholdsLayout.addRow('Floating: ', self.floatingThresholdSlider)
 
 
@@ -321,16 +323,24 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
                                               filename='log_ref-{}_flo-{}_{}'.format(refName, floName, trsfType),
                                               dateTime=dateTime)
 
+        refThreshMin, refThreshMax = self.referenceNormalizedThresholds
+        floThreshMin, floThreshMax = self.floatingNormalizedThresholds
+
         cmd = [BLOCKMATCHING_PATH]
         cmd += ['-reference', self.refPath]
         cmd += ['-floating', self.floPath]
         cmd += ['-result', self.resPath]
         cmd += ['-result-transformation', self.resultTransformPath]
+        cmd += ['-reference-low-threshold', str(refThreshMin)]
+        cmd += ['-reference-high-threshold', str(refThreshMax)]
+        cmd += ['-floating-low-threshold', str(floThreshMin)]
+        cmd += ['-floating-high-threshold', str(floThreshMax)]
         cmd += ['-pyramid-highest-level', str(self.pyramidHighestSpinBox.value)]
         cmd += ['-pyramid-lowest-level', str(self.pyramidLowestSpinBox.value)]
         cmd += ['-transformation-type', trsfType]
         cmd += ['-command-line', self.cmdPath]
         cmd += ['-logfile', self.logPath]
+
 
         if self.pyramidGaussianFilteringCheckBox.isChecked():
             cmd += ['-pyramid-gaussian-filtering']
@@ -494,15 +504,21 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.resultVolumeNode = self.resultVolumeSelector.currentNode()
         self.resultTransformNode = self.resultTransformSelector.currentNode()
 
+        self.referenceNormalizedThresholds = self.logic.getNormalizedThresholds(self.referenceVolumeNode)
+        self.floatingNormalizedThresholds = self.logic.getNormalizedThresholds(self.floatingVolumeNode)
+
 
     ### Signals ###
     def onInputModified(self):
         self.readParameters()
+
+        # Enable apply button
         validMinimumInputs = self.referenceVolumeNode and \
                              self.floatingVolumeNode and \
                              (self.resultVolumeNode or self.resultTransformNode)
         self.applyButton.setEnabled(validMinimumInputs)
 
+        # Update pyramid widgets
         self.referencePyramidMap = self.logic.getPyramidShapesMap(self.referenceVolumeNode)
         if self.referencePyramidMap is None:
             self.pyramidHighestSpinBox.setDisabled(True)
@@ -512,6 +528,29 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
             self.pyramidLowestSpinBox.setEnabled(True)
             self.pyramidHighestSpinBox.maximum = max(self.referencePyramidMap.keys())
         self.onPyramidLevelsChanged()
+
+        # Update thresholds sliders
+        if self.referenceVolumeNode is None:
+            self.referenceThresholdSlider.setDisabled(True)
+        else:
+            minValue, maxValue = self.logic.getRange(self.referenceVolumeNode)
+            self.referenceThresholdSlider.minimum = minValue
+            self.referenceThresholdSlider.maximum = maxValue
+            thresholdMin, thresholdMax = self.logic.getThresholdRange(self.referenceVolumeNode)
+            self.referenceThresholdSlider.minimumValue = thresholdMin
+            self.referenceThresholdSlider.maximumValue = thresholdMax
+            self.referenceThresholdSlider.setEnabled(True)
+
+        if self.floatingVolumeNode is None:
+            self.floatingThresholdSlider.setDisabled(True)
+        else:
+            minValue, maxValue = self.logic.getRange(self.floatingVolumeNode)
+            self.floatingThresholdSlider.minimum = minValue
+            self.floatingThresholdSlider.maximum = maxValue
+            thresholdMin, thresholdMax = self.logic.getThresholdRange(self.floatingVolumeNode)
+            self.floatingThresholdSlider.minimumValue = thresholdMin
+            self.floatingThresholdSlider.maximumValue = thresholdMax
+            self.floatingThresholdSlider.setEnabled(True)
 
 
     def onTransformationTypeChanged(self):
@@ -536,6 +575,26 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
             lowestLevelShape = self.referencePyramidMap[self.pyramidLowestSpinBox.value]
             self.pyramidHighestLabel.text = getShapeString(highestLevelShape)
             self.pyramidLowestLabel.text = getShapeString(lowestLevelShape)
+
+
+    def onReferenceThresholdSlider(self):
+        if self.referenceVolumeNode is not None:
+            displayNode = self.referenceVolumeNode.GetDisplayNode()
+            displayNode.AutoThresholdOff()
+            displayNode.ApplyThresholdOn()
+            thresMin = self.referenceThresholdSlider.minimumValue
+            thresMax = self.referenceThresholdSlider.maximumValue
+            displayNode.SetThreshold(thresMin, thresMax)
+
+
+    def onFloatingThresholdSlider(self):
+        if self.floatingVolumeNode is not None:
+            displayNode = self.floatingVolumeNode.GetDisplayNode()
+            displayNode.AutoThresholdOff()
+            displayNode.ApplyThresholdOn()
+            thresMin = self.floatingThresholdSlider.minimumValue
+            thresMax = self.floatingThresholdSlider.maximumValue
+            displayNode.SetThreshold(thresMin, thresMax)
 
 
     def onApply(self):
@@ -790,3 +849,25 @@ class BlockmatchingLogic(ScriptedLoadableModuleLogic):
     def isDouble(self, volumeNode):
         header = self.getNIFTIHeader(volumeNode)
         return header.GetDataType() == 64
+
+
+    def getRange(self, volumeNode):
+        if volumeNode is None: return None
+        array = slicer.util.array(volumeNode.GetID())
+        return array.min(), array.max()
+
+
+    def getThresholdRange(self, volumeNode):
+        if volumeNode is None: return None
+        displayNode = volumeNode.GetDisplayNode()
+        return displayNode.GetLowerThreshold(), displayNode.GetUpperThreshold()
+
+
+    def getNormalizedThresholds(self, volumeNode):
+        if volumeNode is None: return None
+        imageMin, imageMax = np.array(self.getRange(volumeNode), np.float)
+        thresholds = np.array(self.getThresholdRange(volumeNode), np.float)
+        thresholds -= imageMin
+        thresholds /= imageMax
+        thresholds *= 255
+        return tuple(thresholds.astype(np.uint8))
