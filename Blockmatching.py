@@ -9,7 +9,7 @@ import subprocess
 import numpy as np
 import sitkUtils as su
 import SimpleITK as sitk
-from __main__ import vtk, qt, ctk, slicer
+import vtk, qt, ctk, slicer
 from slicer.ScriptedLoadableModule import *
 
 
