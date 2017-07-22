@@ -1,12 +1,12 @@
 # Blockmatching
 [3D Slicer](https://www.slicer.org/) module as a GUI for `blockmatching`.
 
-In a terminal, run:
+Assuming `blockmatching` is correctly installed, run in a terminal:
 ```
-mkdir ~/git
+mkdir -p ~/git
 cd ~/git
 git clone https://github.com/fepegar/slicer-blockmatching.git
-mkdir ~/bin
+mkdir -p ~/bin
 ln -s $(which blockmatching) ~/bin
 ```
 
@@ -15,7 +15,6 @@ In `~/.slicerrc.py`:
 
 ```
 import os
-import qt
 
 moduleFactory = slicer.app.moduleManager().factoryManager()
  
