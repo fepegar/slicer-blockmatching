@@ -14,22 +14,10 @@ ln -s $(which blockmatching) ~/bin
 In `~/.slicerrc.py`:
 
 ```
-import os
+from os.path import expanduser, splitext, basename
 
+modulePath = expanduser('~/git/slicer-blockmatching/Blockmatching.py')
 moduleFactory = slicer.app.moduleManager().factoryManager()
- 
-dirs = ['~/git/slicer-blockmatching']
-
-dirs = filter(os.path.isdir, [os.path.expanduser(d) for d in dirs])
-
-for d in dirs:
-    for fn in os.listdir(d):
-        if not fn.endswith('.py'):
-            continue
-        fp = os.path.join(d, fn)
-        moduleFactory.registerModule(qt.QFileInfo(fp))
-        moduleFactory.loadModules([os.path.splitext(fn)[0]])
+moduleFactory.registerModule(qt.QFileInfo(modulePath))
+moduleFactory.loadModules([splitext(basename(fp))[0]])
 ```
-
-
-
