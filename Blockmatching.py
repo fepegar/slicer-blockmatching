@@ -306,8 +306,11 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
                                               '.nii',
                                               filename='{}_on_{}'.format(floName, refName),
                                               dateTime=dateTime)
+
+        trsfExtension = '.trsf' if self.transformationTypeIsLinear() else '.nii'
+
         self.resultTransformPath = self.logic.getTempPath(self.tempDir,
-                                                          '.trsf',
+                                                          trsfExtension,
                                                           filename='t_ref-{}_flo-{}'.format(refName, floName),
                                                           dateTime=dateTime)
 
@@ -404,21 +407,17 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         trsfType = self.getSelectedTransformationType()
 
         if self.resultTransformNode is not None:
-            if trsfType != 'vectorfield':  # linear
+            if self.transformationTypeIsLinear():
                 matrix = self.logic.readBaladinMatrix(self.resultTransformPath)
                 vtkMatrix = self.logic.getVTKMatrixFromNumpyMatrix(matrix)
                 self.resultTransformNode.SetMatrixTransformFromParent(vtkMatrix)
-            else:  # non-linear
+            else:
                 # Remove result transform node from scene
                 resultTransformName = self.resultTransformNode.GetName()
                 slicer.mrmlScene.RemoveNode(self.resultTransformNode)
 
                 # Load the generated transform node
-                self.displacementFieldPath = self.resultTransformPath.replace('.trsf', '.nii')
-                self.resultTransformNode = self.logic.vectorfieldToDisplacementField(
-                    self.resultTransformPath,
-                    self.referenceVolumeNode,
-                    self.displacementFieldPath)
+                self.resultTransformNode = self.logic.getRASFieldFromLPSField(self.resultTransformPath, self.referenceVolumeNode)
                 self.resultTransformNode.SetName(resultTransformName)
                 self.resultTransformSelector.setCurrentNode(self.resultTransformNode)
 
@@ -740,33 +739,27 @@ class BlockmatchingLogic(ScriptedLoadableModuleLogic):
             f.write(line)
 
 
-    def vectorfieldToDisplacementField(self, vectorfieldPath, referenceNode, displacementFieldPath):
-        stream = self.getDataStreamFromVectorField(vectorfieldPath)
-        referenceImage = su.PullFromSlicer(referenceNode.GetID())
-        shape = list(referenceImage.GetSize())
-        shape.reverse()
+    def getRASFieldFromLPSField(self, displacementFieldPath, referenceNode):
+        image = sitk.ReadImage(displacementFieldPath)
+        arr = sitk.GetArrayFromImage(image)
 
-        # Example of 2D shape at this point: [1, 540, 940]
-
-        # Blockmatching output might be 2D
-        is2D = shape[0] == 1
-        componentsPerVector = 2 if is2D else 3
-        shape.append(componentsPerVector)
-        reshaped = stream.reshape(shape)
-
-        # Force the output to be 3D
+        is2D = len(arr.shape) == 3
         if is2D:
-            zeros = np.zeros_like(reshaped[..., :1])  # z component of the vectors
-            reshaped = np.concatenate((reshaped, zeros), axis=3)
+            arr = arr[:, :, None, :]  # add z voxels axis
+            zeros = np.zeros_like(arr[..., :1])  # add z component of the vectors
+            arr = np.concatenate((arr, zeros), axis=3)
 
-        reshaped[..., :2] *= -1  # RAS to LPS
-        displacementImage = sitk.GetImageFromArray(reshaped)
-        displacementImage.SetOrigin(referenceImage.GetOrigin())
-        displacementImage.SetDirection(referenceImage.GetDirection())
-        displacementImage.SetSpacing(referenceImage.GetSpacing())
+        arr[..., :2] *= -1  # RAS to LPS
+
+        # Create new image
+        referenceImage = su.PullFromSlicer(referenceNode.GetID())
+        newImage = sitk.GetImageFromArray(arr)
+        newImage.SetOrigin(referenceImage.GetOrigin())
+        newImage.SetDirection(referenceImage.GetDirection())
+        newImage.SetSpacing(referenceImage.GetSpacing())
 
         # TODO: convert the image directly into a transform to save space and time
-        sitk.WriteImage(displacementImage, displacementFieldPath)
+        sitk.WriteImage(newImage, displacementFieldPath)
         transformNode = slicer.util.loadTransform(displacementFieldPath, returnNode=True)[1]
         return transformNode
 
