@@ -508,6 +508,10 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.floatingNormalizedThresholds = self.logic.getNormalizedThresholds(self.floatingVolumeNode)
 
 
+    def transformationTypeIsLinear(self):
+        return self.getSelectedTransformationType() != 'vectorfield'
+
+
     ### Signals ###
     def onInputModified(self):
         self.readParameters()
