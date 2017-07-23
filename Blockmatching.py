@@ -404,8 +404,6 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
             fgVolume = self.resultVolumeNode
 
         # If a transform was given, copy the result in it and apply it to the floating image
-        trsfType = self.getSelectedTransformationType()
-
         if self.resultTransformNode is not None:
             if self.transformationTypeIsLinear():
                 matrix = self.logic.readBaladinMatrix(self.resultTransformPath)
@@ -417,7 +415,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
                 slicer.mrmlScene.RemoveNode(self.resultTransformNode)
 
                 # Load the generated transform node
-                self.resultTransformNode = self.logic.getRASFieldFromLPSField(self.resultTransformPath, self.referenceVolumeNode)
+                self.resultTransformNode = self.logic.loadRASDisplacementFieldTransform(self.resultTransformPath)
                 self.resultTransformNode.SetName(resultTransformName)
                 self.resultTransformSelector.setCurrentNode(self.resultTransformNode)
 
@@ -737,6 +735,22 @@ class BlockmatchingLogic(ScriptedLoadableModuleLogic):
         line = '\n'.join(lines)
         with open(trsfPath, 'w') as f:
             f.write(line)
+
+
+    def loadRASDisplacementFieldTransform(self, displacementFieldPath):
+        _, transformNode = slicer.util.loadTransform(displacementFieldPath, returnNode=True)
+        transform = transformNode.GetTransformFromParent()
+        imageData = transform.GetDisplacementGrid()
+        arr = vtk.util.numpy_support.vtk_to_numpy(imageData.GetPointData().GetScalars())
+        arr[:, :2] *= -1
+
+        is2D = imageData.GetDimensions()[2] == 1
+        if is2D:
+            arr[:, 2] = 0  # TODO: rethink this
+
+        transformNode.Modified()  # necessary?
+
+        return transformNode
 
 
     def getRASFieldFromLPSField(self, displacementFieldPath, referenceNode):
