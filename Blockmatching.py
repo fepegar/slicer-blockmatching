@@ -419,6 +419,14 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
                 self.resultTransformNode.SetName(resultTransformName)
                 self.resultTransformSelector.setCurrentNode(self.resultTransformNode)
 
+                # For debugging
+                if self.developerMode:
+                    self.resultDisplacementFieldVolumeNode = slicer.util.loadVolume(self.displacementFieldPath, returnNode=True)[1]
+                    if self.resultDisplacementFieldVolumeNode:
+                        self.resultDisplacementFieldVolumeNode.SetName(resultTransformName)
+                    else:
+                        print self.displacementFieldPath, 'not loaded!'
+
             # Apply transform to floating if no result volume node was selected
             if self.resultVolumeNode is None:
                 self.floatingVolumeNode.SetAndObserveTransformNodeID(self.resultTransformNode.GetID())
