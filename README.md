@@ -19,5 +19,5 @@ from os.path import expanduser, splitext, basename
 modulePath = expanduser('~/git/slicer-blockmatching/Blockmatching.py')
 moduleFactory = slicer.app.moduleManager().factoryManager()
 moduleFactory.registerModule(qt.QFileInfo(modulePath))
-moduleFactory.loadModules([splitext(basename(fp))[0]])
+moduleFactory.loadModules([splitext(basename(modulePath))[0]])
 ```
