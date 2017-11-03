@@ -7,7 +7,7 @@ mkdir -p ~/git
 cd ~/git
 git clone https://github.com/fepegar/slicer-blockmatching.git
 mkdir -p ~/bin
-ln -s $(which blockmatching) ~/bin
+ln -sf $(which blockmatching) ~/bin
 ```
 
 
