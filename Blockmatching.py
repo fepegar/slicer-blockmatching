@@ -329,6 +329,11 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         refThreshMin, refThreshMax = self.referenceNormalizedThresholds
         floThreshMin, floThreshMax = self.floatingNormalizedThresholds
 
+        self.displacementFieldPath = self.logic.getTempPath(
+            self.tempDir, '.nii',
+            filename='disp_field_ref-{}_flo-{}_{}'.format(refName, floName, trsfType),
+            dateTime=dateTime)
+
         cmd = [BLOCKMATCHING_PATH]
         cmd += ['-reference', self.refPath]
         cmd += ['-floating', self.floPath]
