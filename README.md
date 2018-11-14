@@ -1,6 +1,13 @@
 # Blockmatching
 [3D Slicer](https://www.slicer.org/) module as a GUI for `blockmatching`.
 
+**Before registration**:
+![test](screenshots/before_reg.png "Before registration")
+
+**After registration**:
+![test](screenshots/after_reg.png "After registration")
+
+
 Assuming `blockmatching` is correctly installed, run in a terminal:
 ```shell
 mkdir -p ~/git
