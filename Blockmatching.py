@@ -372,7 +372,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
             if s.startswith('-'):
                 prettyCmd.append('\\\n')
             prettyCmd.append(s)
-        print ' '.join(prettyCmd)
+        print(' '.join(prettyCmd))
 
 
     def repareResults(self):
@@ -381,7 +381,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         """
 
         if self.resPath.endswith('.hdr'):
-            print 'Correcting result .hdr image'
+            print('Correcting result .hdr image')
             shutil.copy(self.refPath, self.resPath)
 
 
@@ -430,7 +430,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
                     if self.resultDisplacementFieldVolumeNode:
                         self.resultDisplacementFieldVolumeNode.SetName(resultTransformName)
                     else:
-                        print self.displacementFieldPath, 'not loaded!'
+                        print(self.displacementFieldPath, 'not loaded!')
 
             # Apply transform to floating if no result volume node was selected
             if self.resultVolumeNode is None:
@@ -615,14 +615,14 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.readParameters()
         self.getCommandLineList()
         if not self.validateParameters(): return
-        print '\n\n'
+        print('\n\n')
         self.printCommandLine()
         tIni = time.time()
         try:
             qt.QApplication.setOverrideCursor(qt.Qt.WaitCursor)
             p = subprocess.Popen(self.commandLineList, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             output = p.communicate()
-            print '\nBlockmatching returned {}'.format(p.returncode)
+            print('\nBlockmatching returned {}'.format(p.returncode))
             if p.returncode != 0 or not self.outputsExist():
                 # Newer versions of blockmatching return 0
                 # Apparently it always returns 0 :(
@@ -634,12 +634,12 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
                 slicer.util.errorDisplay(errorMessage, windowTitle="Registration error")
             else:
                 tFin = time.time()
-                print '\nRegistration completed in {:.2f} seconds'.format(tFin - tIni)
+                print('\nRegistration completed in {:.2f} seconds'.format(tFin - tIni))
                 self.repareResults()
                 self.loadResults()
         except OSError as e:
-            print e
-            print 'Is blockmatching correctly installed?'
+            print(e)
+            print('Is blockmatching correctly installed?')
         finally:
             qt.QApplication.restoreOverrideCursor()
 
@@ -703,8 +703,8 @@ class BlockmatchingLogic(ScriptedLoadableModuleLogic):
 
     def getNumpyMatrixFromVTKMatrix(self, vtkMatrix):
         matrix = np.identity(4, np.float)
-        for row in xrange(4):
-            for col in xrange(4):
+        for row in range(4):
+            for col in range(4):
                 matrix[row,col] = vtkMatrix.GetElement(row,col)
         return matrix
 
@@ -718,8 +718,8 @@ class BlockmatchingLogic(ScriptedLoadableModuleLogic):
         else:
             raise ValueError('Unknown matrix dimensions.')
 
-        for row in xrange(dimensions + 1):
-            for col in xrange(dimensions + 1):
+        for row in range(dimensions + 1):
+            for col in range(dimensions + 1):
                 vtkMatrix.SetElement(row, col, numpyMatrix[row,col])
         return vtkMatrix
 
