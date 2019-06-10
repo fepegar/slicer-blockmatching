@@ -210,7 +210,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
     def makeTransformationTypeWidgets(self):
         self.trsfTypeTab = qt.QWidget()
         self.parametersTabWidget.addTab(self.trsfTypeTab, 'Transformation type')
-        trsfTypeLayout = qt.QHBoxLayout(self.trsfTypeTab)
+        trsfTypeLayout = qt.QVBoxLayout(self.trsfTypeTab)
 
         self.trsfTypeRadioButtons = []
         for trsfType in TRANSFORMATIONS:
@@ -339,10 +339,10 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         cmd += ['-floating', self.floPath]
         cmd += ['-result', self.resPath]
         cmd += ['-result-transformation', self.resultTransformPath]
-        cmd += ['-reference-low-threshold', str(refThreshMin)]
-        cmd += ['-reference-high-threshold', str(refThreshMax)]
-        cmd += ['-floating-low-threshold', str(floThreshMin)]
-        cmd += ['-floating-high-threshold', str(floThreshMax)]
+        # cmd += ['-reference-low-threshold', str(refThreshMin)]
+        # cmd += ['-reference-high-threshold', str(refThreshMax)]
+        # cmd += ['-floating-low-threshold', str(floThreshMin)]
+        # cmd += ['-floating-high-threshold', str(floThreshMax)]
         cmd += ['-pyramid-highest-level', str(self.pyramidHighestSpinBox.value)]
         cmd += ['-pyramid-lowest-level', str(self.pyramidLowestSpinBox.value)]
         cmd += ['-transformation-type', trsfType]
