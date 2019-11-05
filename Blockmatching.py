@@ -403,7 +403,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
                 su.PushToSlicer(resultImage, resultName, overwrite=True)
                 self.resultVolumeNode = slicer.util.getNode(resultName)
             else:  # load using slicer.util.loadVolume()
-                self.resultVolumeNode = slicer.util.loadVolume(self.resPath, returnNode=True)[1]
+                self.resultVolumeNode = slicer.util.loadVolume(self.resPath)
             self.resultVolumeNode.SetName(resultName)
             self.resultVolumeSelector.setCurrentNode(self.resultVolumeNode)
             fgVolume = self.resultVolumeNode
@@ -426,7 +426,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
 
                 # For debugging
                 if self.developerMode:
-                    self.resultDisplacementFieldVolumeNode = slicer.util.loadVolume(self.displacementFieldPath, returnNode=True)[1]
+                    self.resultDisplacementFieldVolumeNode = slicer.util.loadVolume(self.displacementFieldPath)
                     if self.resultDisplacementFieldVolumeNode:
                         self.resultDisplacementFieldVolumeNode.SetName(resultTransformName)
                     else:
@@ -787,7 +787,7 @@ class BlockmatchingLogic(ScriptedLoadableModuleLogic):
 
         # TODO: convert the image directly into a transform to save space and time
         sitk.WriteImage(newImage, displacementFieldPath)
-        transformNode = slicer.util.loadTransform(displacementFieldPath, returnNode=True)[1]
+        transformNode = slicer.util.loadTransform(displacementFieldPath)
         return transformNode
 
 
