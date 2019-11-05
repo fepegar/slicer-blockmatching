@@ -123,7 +123,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.referenceSelector.removeEnabled = True
         self.referenceSelector.noneEnabled = False
         self.referenceSelector.showHidden = False
-        self.referenceSelector.showChildNodeTypes = True
+        self.referenceSelector.showChildNodeTypes = False
         self.referenceSelector.setMRMLScene(slicer.mrmlScene)
         self.referenceSelector.currentNodeChanged.connect(self.onInputModified)
         self.inputsLayout.addRow("Reference: ", self.referenceSelector)
@@ -136,7 +136,7 @@ class BlockmatchingWidget(ScriptedLoadableModuleWidget):
         self.floatingSelector.removeEnabled = True
         self.floatingSelector.noneEnabled = False
         self.floatingSelector.showHidden = True
-        self.floatingSelector.showChildNodeTypes = True
+        self.floatingSelector.showChildNodeTypes = False
         self.floatingSelector.setMRMLScene(slicer.mrmlScene)
         self.floatingSelector.currentNodeChanged.connect(self.onInputModified)
         self.inputsLayout.addRow("Floating: ", self.floatingSelector)
