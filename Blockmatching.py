@@ -702,7 +702,7 @@ class BlockmatchingLogic(ScriptedLoadableModuleLogic):
 
 
     def getNumpyMatrixFromVTKMatrix(self, vtkMatrix):
-        matrix = np.identity(4, np.float)
+        matrix = np.identity(4, float)
         for row in range(4):
             for col in range(4):
                 matrix[row,col] = vtkMatrix.GetElement(row,col)
@@ -889,8 +889,8 @@ class BlockmatchingLogic(ScriptedLoadableModuleLogic):
 
     def getNormalizedThresholds(self, volumeNode):
         if volumeNode is None: return None
-        imageMin, imageMax = np.array(self.getRange(volumeNode), np.float)
-        thresholds = np.array(self.getThresholdRange(volumeNode), np.float)
+        imageMin, imageMax = np.array(self.getRange(volumeNode), np.float32)
+        thresholds = np.array(self.getThresholdRange(volumeNode), np.float32)
         thresholds -= imageMin
         thresholds /= imageMax
         thresholds *= 255
